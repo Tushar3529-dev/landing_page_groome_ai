@@ -1,0 +1,33 @@
+name: landing_groom_page
+description: "Groome — a premium digital platform for salon businesses."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cloud_firestore: ^6.1.3
+  cloud_functions: ^6.0.6
+  cupertino_icons: ^1.0.8
+  equatable: ^2.0.8
+  firebase_core: ^4.5.0
+  flutter_bloc: ^9.1.1
+  get_it: ^9.2.1
+  go_router: ^17.1.0
+  google_fonts: ^8.0.2
+  intl: ^0.20.2
+  url_launcher: ^6.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

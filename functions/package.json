@@ -1,0 +1,27 @@
+{
+  "name": "groome-functions",
+  "description": "Firebase Cloud Functions for Groome",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node --test",
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.0",
+    "firebase-functions": "^7.0.1",
+    "nodemailer": "^9.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

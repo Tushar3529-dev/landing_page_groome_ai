@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /contact_leads/{leadId} {
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'name', 'email', 'phone', 'businessName', 'message', 'createdAt'
+        ]) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() >= 2 &&
+        request.resource.data.name.size() <= 120 &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() <= 254 &&
+        request.resource.data.phone is string &&
+        request.resource.data.phone.size() <= 30 &&
+        request.resource.data.businessName is string &&
+        request.resource.data.businessName.size() <= 160 &&
+        request.resource.data.message is string &&
+        request.resource.data.message.size() >= 10 &&
+        request.resource.data.message.size() <= 3000 &&
+        request.resource.data.createdAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+  }
+}

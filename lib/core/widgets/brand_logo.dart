@@ -13,7 +13,7 @@ class BrandLogo extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+      /*   Container(
           width: 34,
           height: 34,
           decoration: const BoxDecoration(
@@ -31,7 +31,7 @@ class BrandLogo extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 10), */
         Text(
           'groome',
           style: GoogleFonts.manrope(

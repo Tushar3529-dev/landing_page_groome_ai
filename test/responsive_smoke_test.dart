@@ -37,6 +37,29 @@ void main() {
     expect(find.textContaining('Bring Your'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('navigates to policy pages from the footer', (tester) async {
+    await _setSurface(tester, const Size(1440, 1800));
+
+    await tester.pumpWidget(const GroomeApp());
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Privacy Policy'));
+    await tester.tap(find.text('Privacy Policy'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Privacy Policy'), findsWidgets);
+    expect(find.textContaining('Groome is committed'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.ensureVisible(find.text('Terms & Conditions'));
+    await tester.tap(find.text('Terms & Conditions'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Terms & Conditions'), findsWidgets);
+    expect(find.textContaining('These Terms explain'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _setSurface(WidgetTester tester, Size size) async {

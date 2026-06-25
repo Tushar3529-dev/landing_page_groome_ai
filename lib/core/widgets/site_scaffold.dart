@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:landing_groom_page/core/constants/app_constants.dart';
+import 'package:landing_groom_page/core/content/site_content.dart';
 import 'package:landing_groom_page/core/services/link_service.dart';
 import 'package:landing_groom_page/core/utils/responsive.dart';
 import 'package:landing_groom_page/core/widgets/app_button.dart';
@@ -42,6 +43,7 @@ class SiteScaffold extends StatelessWidget {
               ]
             : [
                 _NavLink(label: 'Home', route: AppRoutes.home),
+                _NavLink(label: 'About', route: AppRoutes.about),
                 _NavLink(label: 'Features', route: AppRoutes.features),
                 _NavLink(label: 'Contact', route: AppRoutes.contact),
                 const SizedBox(width: 26),
@@ -120,6 +122,7 @@ class _MobileMenu extends StatelessWidget {
             const SizedBox(height: 42),
             for (final item in const [
               ('Home', AppRoutes.home),
+              ('About', AppRoutes.about),
               ('Features', AppRoutes.features),
               ('Contact', AppRoutes.contact),
             ])
@@ -157,21 +160,18 @@ class SiteFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mobile = context.isMobile;
-    final links = Wrap(
-      spacing: 14,
-      runSpacing: 6,
-      children: [
-        _FooterLink(label: 'Home', onTap: () => context.go(AppRoutes.home)),
-        _FooterLink(
-          label: 'Features',
-          onTap: () => context.go(AppRoutes.features),
-        ),
-        _FooterLink(
-          label: 'Contact',
-          onTap: () => context.go(AppRoutes.contact),
-        ),
-      ],
-    );
+    const quickLinks = [
+      _FooterRoute(label: 'About Us', route: AppRoutes.about),
+      _FooterRoute(label: 'Features', route: AppRoutes.features),
+      _FooterRoute(label: 'Contact', route: AppRoutes.contact),
+    ];
+    const policyLinks = [
+      _FooterRoute(label: 'Privacy Policy', route: AppRoutes.privacyPolicy),
+      _FooterRoute(
+        label: 'Terms & Conditions',
+        route: AppRoutes.termsConditions,
+      ),
+    ];
 
     return Container(
       color: AppColors.ink,
@@ -189,24 +189,41 @@ class SiteFooter extends StatelessWidget {
           child: Column(
             children: [
               if (mobile)
-                Column(
+                const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const BrandLogo(light: true),
-                    const SizedBox(height: 28),
-                    links,
-                    const SizedBox(height: 26),
-                    const _SocialLinks(),
+                    _FooterBrand(),
+                    SizedBox(height: 34),
+                    _FooterLinkColumn(title: 'Quick Links', links: quickLinks),
+                    SizedBox(height: 30),
+                    _FooterLinkColumn(title: 'Policies', links: policyLinks),
+                    SizedBox(height: 30),
+                    _FooterContactColumn(),
                   ],
                 )
               else
-                Row(
+                const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const BrandLogo(light: true),
-                    const Spacer(),
-                    links,
-                    const Spacer(),
-                    const _SocialLinks(),
+                    Expanded(flex: 4, child: _FooterBrand()),
+                    SizedBox(width: 58),
+                    Expanded(
+                      flex: 2,
+                      child: _FooterLinkColumn(
+                        title: 'Quick Links',
+                        links: quickLinks,
+                      ),
+                    ),
+                    SizedBox(width: 32),
+                    Expanded(
+                      flex: 2,
+                      child: _FooterLinkColumn(
+                        title: 'Policies',
+                        links: policyLinks,
+                      ),
+                    ),
+                    SizedBox(width: 32),
+                    Expanded(flex: 3, child: _FooterContactColumn()),
                   ],
                 ),
               const SizedBox(height: 44),
@@ -217,7 +234,7 @@ class SiteFooter extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      '© ${DateFormat('yyyy').format(DateTime.now())} Groome. All rights reserved.',
+                      'Copyright ${DateFormat('yyyy').format(DateTime.now())} Groome. All rights reserved.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.white.withValues(alpha: .58),
                         fontSize: 12,
@@ -242,6 +259,94 @@ class SiteFooter extends StatelessWidget {
   }
 }
 
+class _FooterRoute {
+  const _FooterRoute({required this.label, required this.route});
+
+  final String label;
+  final String route;
+}
+
+class _FooterBrand extends StatelessWidget {
+  const _FooterBrand();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const BrandLogo(light: true),
+      const SizedBox(height: 24),
+      Text(
+        SiteContent.footerSummary,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppColors.white.withValues(alpha: .7),
+        ),
+      ),
+      const SizedBox(height: 24),
+      for (final item in SiteContent.footerHighlights)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.check_circle_outline_rounded,
+                color: AppColors.gold,
+                size: 18,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  item,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: AppColors.white.withValues(alpha: .82),
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+class _FooterLinkColumn extends StatelessWidget {
+  const _FooterLinkColumn({required this.title, required this.links});
+
+  final String title;
+  final List<_FooterRoute> links;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _FooterTitle(title),
+      const SizedBox(height: 20),
+      for (final link in links)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _FooterLink(
+            label: link.label,
+            onTap: () => context.go(link.route),
+          ),
+        ),
+    ],
+  );
+}
+
+class _FooterTitle extends StatelessWidget {
+  const _FooterTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    title,
+    style: Theme.of(
+      context,
+    ).textTheme.titleLarge?.copyWith(color: AppColors.white, fontSize: 17),
+  );
+}
+
 class _FooterLink extends StatelessWidget {
   const _FooterLink({required this.label, required this.onTap});
 
@@ -249,10 +354,111 @@ class _FooterLink extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => TextButton(
-    onPressed: onTap,
-    style: TextButton.styleFrom(foregroundColor: AppColors.white),
-    child: Text(label),
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(8),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppColors.white.withValues(alpha: .72),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+  );
+}
+
+class _FooterContactColumn extends StatelessWidget {
+  const _FooterContactColumn();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const _FooterTitle('Get In Touch'),
+      const SizedBox(height: 20),
+      _ContactMethod(
+        icon: Icons.call_outlined,
+        title: 'Call Us',
+        value: SiteContent.phone,
+        onTap: () => LinkService.open(SiteContent.phoneUrl),
+      ),
+      const SizedBox(height: 14),
+      _ContactMethod(
+        icon: Icons.mail_outline_rounded,
+        title: 'Email Us',
+        value: SiteContent.supportEmail,
+        onTap: () => LinkService.open(SiteContent.supportEmailUrl),
+      ),
+      const SizedBox(height: 24),
+      Divider(color: AppColors.white.withValues(alpha: .14)),
+      const SizedBox(height: 18),
+      Text(
+        'Follow Us',
+        style: Theme.of(
+          context,
+        ).textTheme.labelLarge?.copyWith(color: AppColors.white),
+      ),
+      const SizedBox(height: 14),
+      const _SocialLinks(),
+    ],
+  );
+}
+
+class _ContactMethod extends StatelessWidget {
+  const _ContactMethod({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(14),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.gold.withValues(alpha: .16),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: AppColors.gold, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(color: AppColors.white),
+              ),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.white.withValues(alpha: .7),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
   );
 }
 
@@ -260,23 +466,33 @@ class _SocialLinks extends StatelessWidget {
   const _SocialLinks();
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
+  Widget build(BuildContext context) => const Wrap(
+    spacing: 10,
+    runSpacing: 10,
     children: [
       _SocialIcon(
         label: 'Instagram',
+        handle: SiteContent.instagramHandle,
         icon: Icons.camera_alt_outlined,
-        onTap: () => LinkService.open('https://instagram.com'),
+        url: SiteContent.instagramUrl,
       ),
       _SocialIcon(
         label: 'LinkedIn',
+        handle: SiteContent.linkedInHandle,
         icon: Icons.work_outline_rounded,
-        onTap: () => LinkService.open('https://linkedin.com'),
+        url: SiteContent.linkedInUrl,
       ),
       _SocialIcon(
-        label: 'WhatsApp',
-        icon: Icons.chat_bubble_outline_rounded,
-        onTap: () => LinkService.open('https://wa.me/'),
+        label: 'YouTube',
+        handle: SiteContent.youtubeHandle,
+        icon: Icons.play_arrow_rounded,
+        url: SiteContent.youtubeUrl,
+      ),
+      _SocialIcon(
+        label: 'X',
+        handle: SiteContent.xHandle,
+        icon: Icons.alternate_email_rounded,
+        url: SiteContent.xUrl,
       ),
     ],
   );
@@ -285,19 +501,32 @@ class _SocialLinks extends StatelessWidget {
 class _SocialIcon extends StatelessWidget {
   const _SocialIcon({
     required this.label,
+    required this.handle,
     required this.icon,
-    required this.onTap,
+    required this.url,
   });
 
   final String label;
+  final String handle;
   final IconData icon;
-  final VoidCallback onTap;
+  final String url;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-    tooltip: label,
-    onPressed: onTap,
-    color: AppColors.white,
-    icon: Icon(icon, size: 20),
+  Widget build(BuildContext context) => Tooltip(
+    message: '$label $handle',
+    child: InkWell(
+      onTap: () => LinkService.open(url),
+      borderRadius: BorderRadius.circular(99),
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: AppColors.white.withValues(alpha: .08),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.white.withValues(alpha: .08)),
+        ),
+        child: Icon(icon, size: 20, color: AppColors.white),
+      ),
+    ),
   );
 }

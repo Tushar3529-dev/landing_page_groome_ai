@@ -24,7 +24,7 @@ class HeroSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(99),
             ),
             child: Text(
-              'THE SMARTER WAY TO RUN YOUR SALON',
+              'Now onboarding salon partners in Delhi NCR',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: AppColors.goldDark,
                 fontSize: 11,
@@ -34,7 +34,7 @@ class HeroSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Bring Your\nSalon Online',
+            'Skip the wait.\nBook your salon instantly.',
             style:
                 (mobile
                         ? Theme.of(context).textTheme.displayMedium

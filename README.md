@@ -20,23 +20,17 @@ presentation state uses `flutter_bloc`.
 1. Create a Firebase project with Firestore, Hosting, and Cloud Functions.
 2. The included `.firebaserc` targets `groom-ai-d91fe`. Update it if you move
    this app to another Firebase project.
-3. Add the Gmail credentials as Secret Manager secrets:
+3. Add the Gmail App Password for `support@groome.net` as a Secret Manager
+   secret:
 
    ```powershell
-   firebase functions:secrets:set GMAIL_USER
    firebase functions:secrets:set GMAIL_APP_PASSWORD
    ```
 
-   Use a Gmail App Password, never the account password.
+   Use a Gmail App Password for `support@groome.net`, never the account
+   password.
 
-4. Set the non-secret destination parameter when prompted during deployment,
-   or create `functions/.env.<project-id>` containing:
-
-   ```text
-   OWNER_EMAIL=owner@example.com
-   ```
-
-5. Resolve packages:
+4. Resolve packages:
 
    ```powershell
    flutter pub get
@@ -75,10 +69,56 @@ options.
 ```powershell
 flutter analyze
 flutter test
+Set-Location functions
+npm test
+Set-Location ..
 flutter build web --release
 ```
 
 The build output is written to `build/web`.
+
+## Contact email test
+
+The automated Functions test verifies that a submitted contact lead is converted
+into the Gmail notification sent from `support@groome.net` to
+`Maanyam@groome.net`.
+
+The email body is:
+
+```text
+The new user needs to contact you.
+
+Name:
+...
+
+Email:
+...
+
+Phone no:
+...
+
+Business name:
+...
+
+Message:
+...
+
+Groome
+```
+
+For a real inbox test, deploy the site and Functions with `GMAIL_APP_PASSWORD`
+configured for `support@groome.net`, then submit the Contact form with a test
+lead. Confirm that `Maanyam@groome.net` receives the "New user contact request"
+email from `support@groome.net` and that replying targets the lead email
+address.
+
+If the Contact form shows success but no email arrives, check that the latest
+Function has been deployed and then inspect the function logs:
+
+```powershell
+firebase deploy --only functions
+firebase functions:log --only notifyOwnerOfNewLead
+```
 
 ## Deploy
 

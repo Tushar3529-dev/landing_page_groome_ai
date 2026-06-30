@@ -38,6 +38,38 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('renders about page responsively without layout exceptions', (
+    tester,
+  ) async {
+    for (final size in const [Size(1440, 1200), Size(390, 1200)]) {
+      await _setSurface(tester, size);
+
+      await tester.pumpWidget(const GroomeApp());
+      await tester.pumpAndSettle();
+      await tester.tap(
+        size.width < 680
+            ? find.byTooltip('Open menu')
+            : find.text('About').first,
+      );
+      await tester.pumpAndSettle();
+
+      if (size.width < 680) {
+        await tester.tap(find.text('About'));
+        await tester.pumpAndSettle();
+      }
+
+      expect(
+        find.text('We\'re building the future of India\'s salon industry'),
+        findsOneWidget,
+      );
+      expect(find.text('FOUNDERS’ NOTE'), findsOneWidget);
+      expect(find.text('OUR MISSION'), findsOneWidget);
+      expect(find.text('Discover'), findsOneWidget);
+      expect(find.text('Connect'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('navigates to policy pages from the footer', (tester) async {
     await _setSurface(tester, const Size(1440, 1800));
 

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:landing_groom_page/core/constants/app_constants.dart';
 import 'package:landing_groom_page/core/utils/responsive.dart';
-import 'package:landing_groom_page/core/widgets/app_button.dart';
 import 'package:landing_groom_page/core/widgets/hover_surface.dart';
 import 'package:landing_groom_page/core/widgets/reveal.dart';
 import 'package:landing_groom_page/core/widgets/section_container.dart';
 import 'package:landing_groom_page/core/widgets/site_scaffold.dart';
-import 'package:landing_groom_page/features/home/presentation/widgets/home_sections.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -15,22 +12,13 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const SiteScaffold(
     child: SingleChildScrollView(
-      child: Column(
-        children: [
-          _AboutHero(),
-          _AboutStorySection(),
-          _AboutValuesSection(),
-          _AboutAudienceSection(),
-          _AboutCtaSection(),
-          SiteFooter(),
-        ],
-      ),
+      child: Column(children: [_AboutIntro(), _MissionSection(), SiteFooter()]),
     ),
   );
 }
 
-class _AboutHero extends StatelessWidget {
-  const _AboutHero();
+class _AboutIntro extends StatelessWidget {
+  const _AboutIntro();
 
   @override
   Widget build(BuildContext context) => SectionContainer(
@@ -39,214 +27,222 @@ class _AboutHero extends StatelessWidget {
       context.pagePadding,
       context.isMobile ? 58 : 86,
       context.pagePadding,
-      context.isMobile ? 70 : 96,
+      context.isMobile ? 76 : 104,
     ),
-    child: context.isMobile
-        ? const Column(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Reveal(child: _IntroHeading()),
+        SizedBox(height: context.isMobile ? 42 : 58),
+        if (context.isMobile)
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Reveal(child: _AboutHeroCopy()),
-              SizedBox(height: 42),
+              Reveal(delay: Duration(milliseconds: 100), child: _StoryCopy()),
+              SizedBox(height: 36),
+              Reveal(delay: Duration(milliseconds: 180), child: _SalonImage()),
+              SizedBox(height: 24),
               Reveal(
-                delay: Duration(milliseconds: 140),
-                child: _AboutHeroImage(),
+                delay: Duration(milliseconds: 240),
+                child: _FoundersNote(),
               ),
             ],
           )
-        : const Row(
+        else
+          const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(flex: 10, child: Reveal(child: _AboutHeroCopy())),
-              SizedBox(width: 68),
+              Expanded(
+                flex: 11,
+                child: Reveal(
+                  delay: Duration(milliseconds: 100),
+                  child: _StoryCopy(),
+                ),
+              ),
+              SizedBox(width: 72),
               Expanded(
                 flex: 9,
-                child: Reveal(
-                  delay: Duration(milliseconds: 140),
-                  child: _AboutHeroImage(),
+                child: Column(
+                  children: [
+                    Reveal(
+                      delay: Duration(milliseconds: 180),
+                      child: _SalonImage(),
+                    ),
+                    SizedBox(height: 24),
+                    Reveal(
+                      delay: Duration(milliseconds: 240),
+                      child: _FoundersNote(),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+      ],
+    ),
   );
 }
 
-class _AboutHeroCopy extends StatelessWidget {
-  const _AboutHeroCopy();
+class _IntroHeading extends StatelessWidget {
+  const _IntroHeading();
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: const BoxConstraints(maxWidth: 980),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ABOUT US',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: AppColors.goldDark,
+            fontSize: 11,
+            letterSpacing: 1.6,
+          ),
+        ),
+        const SizedBox(height: 18),
+        Text(
+          'We\'re building the future of India\'s salon industry',
+          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+            fontSize: context.isMobile ? 52 : 72,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _StoryCopy extends StatelessWidget {
+  const _StoryCopy();
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        'ABOUT US',
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: AppColors.goldDark,
-          fontSize: 11,
-          letterSpacing: 1.5,
-        ),
-      ),
-      const SizedBox(height: 18),
-      Text(
-        'We\'re building the future of India\'s salon industry',
-        style: Theme.of(context).textTheme.displayMedium,
+        'Every day, customers struggle to discover trusted salons, compare '
+        'services, and book appointments effortlessly. At the same time, many '
+        'salon owners still rely on phone calls, WhatsApp messages, and manual '
+        'records to manage their business and attract new customers.',
+        style: Theme.of(context).textTheme.bodyLarge,
       ),
       const SizedBox(height: 24),
       Text(
-        'Groome is a digital platform for salon businesses that want online bookings, customer records, reminders, and business visibility without adding more admin to the day.',
+        'Groome brings both sides together on one platform. Customers can '
+        'discover, compare, and instantly book salons through the Groome app, '
+        'while salon owners manage bookings, customers, marketing, and daily '
+        'operations from one unified dashboard. We\'re starting in Delhi with '
+        'a vision to build the platform every salon in India grows with.',
         style: Theme.of(context).textTheme.bodyLarge,
-      ),
-      const SizedBox(height: 32),
-      AppButton(
-        label: 'Get in touch',
-        icon: Icons.arrow_outward_rounded,
-        onPressed: () => context.go(AppRoutes.contact),
       ),
     ],
   );
 }
 
-class _AboutHeroImage extends StatelessWidget {
-  const _AboutHeroImage();
+class _SalonImage extends StatelessWidget {
+  const _SalonImage();
 
   @override
   Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(30),
+    borderRadius: BorderRadius.circular(28),
     child: AspectRatio(
-      aspectRatio: context.isMobile ? 1 : .92,
+      aspectRatio: context.isMobile ? 1.18 : 1.4,
       child: Image.asset(
         AppAssets.salonOwner,
         fit: BoxFit.cover,
-        semanticLabel: 'Salon owner using Groome',
+        alignment: Alignment.topCenter,
+        semanticLabel: 'Salon owner at work',
       ),
     ),
   );
 }
 
-class _AboutStorySection extends StatelessWidget {
-  const _AboutStorySection();
+class _FoundersNote extends StatelessWidget {
+  const _FoundersNote();
 
   @override
-  Widget build(BuildContext context) => SectionContainer(
-    child: context.isMobile
-        ? const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SectionHeading(
-                eyebrow: 'Our story',
-                title: 'Practical software for real salon days',
-                description:
-                    'We believe salon technology should feel clear, reliable, and human. Groome is designed around the everyday work of owners, front desks, stylists, and customers.',
-                centered: false,
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: EdgeInsets.all(context.isMobile ? 24 : 28),
+    decoration: BoxDecoration(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: AppColors.line),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.ink.withValues(alpha: .035),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 34,
+              height: 2,
+              decoration: BoxDecoration(
+                color: AppColors.gold,
+                borderRadius: BorderRadius.circular(2),
               ),
-              SizedBox(height: 34),
-              _StoryPoints(),
-            ],
-          )
-        : const Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SectionHeading(
-                  eyebrow: 'Our story',
-                  title: 'Practical software for real salon days',
-                  description:
-                      'We believe salon technology should feel clear, reliable, and human. Groome is designed around the everyday work of owners, front desks, stylists, and customers.',
-                  centered: false,
-                ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'FOUNDERS’ NOTE',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppColors.goldDark,
+                fontSize: 10,
+                letterSpacing: 1.4,
               ),
-              SizedBox(width: 76),
-              Expanded(child: _StoryPoints()),
-            ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Text(
+          '“Great salons deserve great technology.”',
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            fontSize: context.isMobile ? 30 : 34,
           ),
+        ),
+        const SizedBox(height: 14),
+        Text(
+          'Groome was created with a simple belief: great salons deserve '
+          'great technology. We\'re building a platform that helps salon '
+          'owners spend less time managing bookings and more time growing '
+          'their business.',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    ),
   );
 }
 
-class _StoryPoints extends StatelessWidget {
-  const _StoryPoints();
+class _MissionSection extends StatelessWidget {
+  const _MissionSection();
 
   static const _items = [
     (
-      Icons.event_available_outlined,
-      'Bookings without back-and-forth',
-      'Customers can discover services and book quickly while salon teams keep control of the schedule.',
+      Icons.location_on_outlined,
+      'Discover',
+      'Help customers find great salons nearby.',
     ),
     (
-      Icons.groups_2_outlined,
-      'Customer memory that stays organised',
-      'Profiles, preferences, and visit history help teams deliver more personal service.',
+      Icons.calendar_month_outlined,
+      'Book',
+      'Instant online appointments without phone calls.',
     ),
     (
-      Icons.insights_rounded,
-      'Simple visibility for owners',
-      'Clear activity and revenue signals help salon owners make better daily decisions.',
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      for (var i = 0; i < _items.length; i++)
-        Padding(
-          padding: EdgeInsets.only(bottom: i == _items.length - 1 ? 0 : 18),
-          child: Reveal(
-            delay: Duration(milliseconds: 90 * i),
-            child: _StoryPoint(item: _items[i]),
-          ),
-        ),
-    ],
-  );
-}
-
-class _StoryPoint extends StatelessWidget {
-  const _StoryPoint({required this.item});
-
-  final (IconData, String, String) item;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Container(
-        width: 46,
-        height: 46,
-        decoration: BoxDecoration(
-          color: AppColors.gold.withValues(alpha: .14),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Icon(item.$1, color: AppColors.goldDark),
-      ),
-      const SizedBox(width: 16),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(item.$2, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 6),
-            Text(item.$3, style: Theme.of(context).textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-class _AboutValuesSection extends StatelessWidget {
-  const _AboutValuesSection();
-
-  static const _values = [
-    (
-      Icons.spa_outlined,
-      'Hospitality first',
-      'Software should support the customer experience, not distract from it.',
+      Icons.trending_up_rounded,
+      'Grow',
+      'Give salons tools to attract and retain customers.',
     ),
     (
-      Icons.verified_user_outlined,
-      'Trust by design',
-      'Customer and salon data should be handled carefully, clearly, and securely.',
-    ),
-    (
-      Icons.auto_awesome_motion_outlined,
-      'Less operational noise',
-      'The best tools remove repeated work and make the next action obvious.',
+      Icons.handshake_outlined,
+      'Connect',
+      'Bring customers and salon owners together in one ecosystem.',
     ),
   ];
 
@@ -255,46 +251,25 @@ class _AboutValuesSection extends StatelessWidget {
     color: AppColors.softCream,
     child: Column(
       children: [
-        const SectionHeading(
-          eyebrow: 'What guides us',
-          title: 'Designed around trust, clarity, and momentum',
-          description:
-              'Groome is built for businesses that care about quality service and steady growth.',
-        ),
-        const SizedBox(height: 54),
+        const Reveal(child: _MissionHeading()),
+        SizedBox(height: context.isMobile ? 42 : 58),
         LayoutBuilder(
           builder: (context, constraints) {
-            final columns = context.isMobile ? 1 : 3;
-            final gap = context.isMobile ? 18.0 : 22.0;
-            final width =
+            final columns = context.isMobile ? 1 : (context.isTablet ? 2 : 4);
+            final gap = context.isMobile ? 16.0 : 20.0;
+            final cardWidth =
                 (constraints.maxWidth - gap * (columns - 1)) / columns;
+
             return Wrap(
               spacing: gap,
               runSpacing: gap,
               children: [
-                for (var i = 0; i < _values.length; i++)
+                for (var i = 0; i < _items.length; i++)
                   SizedBox(
-                    width: width,
+                    width: cardWidth,
                     child: Reveal(
                       delay: Duration(milliseconds: 90 * i),
-                      child: HoverSurface(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(_values[i].$1, color: AppColors.goldDark),
-                            const SizedBox(height: 24),
-                            Text(
-                              _values[i].$2,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              _values[i].$3,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _MissionCard(item: _items[i]),
                     ),
                   ),
               ],
@@ -306,118 +281,70 @@ class _AboutValuesSection extends StatelessWidget {
   );
 }
 
-class _AboutAudienceSection extends StatelessWidget {
-  const _AboutAudienceSection();
+class _MissionHeading extends StatelessWidget {
+  const _MissionHeading();
 
   @override
-  Widget build(BuildContext context) => SectionContainer(
-    child: Column(
-      children: [
-        const SectionHeading(
-          eyebrow: 'Who we serve',
-          title: 'For independent salons, studios, and growing teams',
-          description:
-              'Whether a salon is taking its first online bookings or scaling across a team, Groome gives the business a cleaner operating rhythm.',
-        ),
-        const SizedBox(height: 42),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          alignment: WrapAlignment.center,
-          children: const [
-            _AudiencePill('Salon owners'),
-            _AudiencePill('Front desk teams'),
-            _AudiencePill('Stylists and artists'),
-            _AudiencePill('Multi-service studios'),
-            _AudiencePill('Beauty and grooming businesses'),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-class _AudiencePill extends StatelessWidget {
-  const _AudiencePill(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-    decoration: BoxDecoration(
-      color: AppColors.cream,
-      borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: AppColors.line),
-    ),
-    child: Text(label, style: Theme.of(context).textTheme.labelLarge),
-  );
-}
-
-class _AboutCtaSection extends StatelessWidget {
-  const _AboutCtaSection();
-
-  @override
-  Widget build(BuildContext context) => SectionContainer(
-    color: AppColors.cream,
-    child: Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: context.isMobile ? 26 : 56,
-        vertical: context.isMobile ? 42 : 54,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.ink,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: context.isMobile
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _copy(context),
-                const SizedBox(height: 24),
-                AppButton(
-                  label: 'Contact us',
-                  light: true,
-                  outlined: true,
-                  onPressed: () => context.go(AppRoutes.contact),
-                ),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: _copy(context)),
-                const SizedBox(width: 34),
-                AppButton(
-                  label: 'Contact us',
-                  light: true,
-                  outlined: true,
-                  icon: Icons.arrow_outward_rounded,
-                  onPressed: () => context.go(AppRoutes.contact),
-                ),
-              ],
-            ),
-    ),
-  );
-
-  Widget _copy(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => Column(
     children: [
       Text(
-        'GET IN TOUCH',
+        'OUR MISSION',
+        textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: AppColors.gold,
+          color: AppColors.goldDark,
           fontSize: 11,
-          letterSpacing: 1.5,
+          letterSpacing: 1.6,
         ),
       ),
-      const SizedBox(height: 12),
-      Text(
-        'Want to bring your salon online with Groome?',
-        style: Theme.of(
-          context,
-        ).textTheme.headlineLarge?.copyWith(color: AppColors.white),
+      const SizedBox(height: 14),
+      ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 920),
+        child: Text(
+          'To make every salon in India discoverable, bookable, and '
+          'manageable from one platform.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+            fontSize: context.isMobile ? 41 : 56,
+          ),
+        ),
       ),
     ],
+  );
+}
+
+class _MissionCard extends StatelessWidget {
+  const _MissionCard({required this.item});
+
+  final (IconData, String, String) item;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: context.isMobile ? null : 256,
+    child: HoverSurface(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: AppColors.gold.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(item.$1, color: AppColors.goldDark, size: 25),
+          ),
+          const SizedBox(height: 20),
+          Text(item.$2, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(
+            item.$3,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontSize: 14, height: 1.5),
+          ),
+        ],
+      ),
+    ),
   );
 }

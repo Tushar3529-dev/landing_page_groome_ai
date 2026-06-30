@@ -35,7 +35,7 @@ class HeroSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Skip the wait.\nBook your salon instantly.',
+            'Get discovered. Get booked. Grow your salon.',
             style:
                 (mobile
                         ? Theme.of(context).textTheme.displayMedium

@@ -70,18 +70,34 @@ class WhyGroomeSection extends StatelessWidget {
   static const _items = [
     (
       Icons.calendar_month_outlined,
-      'Online Booking',
-      'Enable customers to book appointments instantly.',
+      '📍 Get Discovered',
+      'Our salon appears in front of new and existing customers on the Groome app, helping you reach people actively looking to book nearby.',
     ),
     (
       Icons.groups_2_outlined,
-      'Manage Customers',
-      'Track customers and appointments effortlessly.',
+      '📅 Instant Bookings',
+      'Customers book appointments instantly through the Groome app, with automatic confirmations and reminders—eliminating phone calls and manual scheduling.',
     ),
     (
       Icons.chat_bubble_outline_rounded,
-      'WhatsApp Notifications',
-      'Automatically notify customers through WhatsApp.',
+      '❤️ Customer Retention',
+      'Keep customers coming back with automated reminders, personalized notifications, loyalty rewards, and exclusive offers through the Groome app.',
+    ),
+     (
+      Icons.chat_bubble_outline_rounded,
+      '📈 Business Dashboard',
+      'Manage bookings, customers, appointments, staff, revenue, and business insights—all from one unified dashboard.',
+    ),
+     (
+      Icons.chat_bubble_outline_rounded,
+      '📢 Marketing',
+      'Create offers, discounts, and promotions that are sent directly to your customers and featured on the Groome app to attract both new and returning customers.',
+
+    ),
+      (
+      Icons.chat_bubble_outline_rounded,
+      '👥 Customer CRM',
+'Build a complete customer database with booking history, preferences, and visit records, helping you strengthen relationships, improve retention, and increase repeat bookings.',
     ),
   ];
 
@@ -92,7 +108,7 @@ class WhyGroomeSection extends StatelessWidget {
         const Reveal(
           child: SectionHeading(
             eyebrow: 'Why Groome',
-            title: 'Everything your salon needs',
+            title: 'Why salons choose Groome',
             description:
                 'Less admin, fewer missed appointments, and more time for the work your customers love.',
           ),
@@ -164,9 +180,11 @@ class HowItWorksSection extends StatelessWidget {
   const HowItWorksSection({super.key});
 
   static const _steps = [
-    ('01', 'Customers discover your salon', Icons.search_rounded),
-    ('02', 'Book appointments online', Icons.event_available_outlined),
-    ('03', 'Grow revenue and customer retention', Icons.trending_up_rounded),
+    ('01', 'Customer discovers your salon on the Groome app', Icons.search_rounded),
+    ('02', 'Books an appointment instantly', Icons.event_available_outlined),
+    ('03', 'Groome confirms the booking automatically', Icons.trending_up_rounded),
+        ('04', 'You manage everything from the Groome dashboard', Icons.dashboard_customize_rounded),
+            ('05', 'Customers return through reminders, offers and loyalty rewards', Icons.stars_rounded),
   ];
 
   @override
@@ -176,7 +194,7 @@ class HowItWorksSection extends StatelessWidget {
       children: [
         const SectionHeading(
           eyebrow: 'How it works',
-          title: 'From discovery to loyal customer',
+          title: 'How Groome Works',
           description:
               'A smooth, connected journey for your customers—and a calmer working day for you.',
         ),
@@ -529,7 +547,7 @@ class HomeCtaSection extends StatelessWidget {
       ),
       const SizedBox(height: 12),
       Text(
-        'Ready to grow your salon business?',
+        'Grow your Salon with Groome?',
         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
           color: AppColors.white,
           fontSize: context.isMobile ? 38 : 48,

@@ -86,7 +86,7 @@ class _AboutHeroCopy extends StatelessWidget {
       ),
       const SizedBox(height: 18),
       Text(
-        'Built for salons that want calmer, smarter growth',
+        'We\'re building the future of India\'s salon industry',
         style: Theme.of(context).textTheme.displayMedium,
       ),
       const SizedBox(height: 24),

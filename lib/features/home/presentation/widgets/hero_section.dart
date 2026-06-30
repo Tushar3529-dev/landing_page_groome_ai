@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:landing_groom_page/constants/text_constant.dart';
 import 'package:landing_groom_page/core/constants/app_constants.dart';
 import 'package:landing_groom_page/core/utils/responsive.dart';
 import 'package:landing_groom_page/core/widgets/app_button.dart';
@@ -45,7 +46,7 @@ class HeroSection extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 550),
             child: Text(
-              'Grow bookings, manage customers and take your business digital with Groome.',
+              TextConstant.homepageSubtitle,
               style: Theme.of(
                 context,
               ).textTheme.bodyLarge?.copyWith(fontSize: mobile ? 16 : 18),
@@ -57,7 +58,7 @@ class HeroSection extends StatelessWidget {
             runSpacing: 12,
             children: [
               AppButton(
-                label: 'Get started',
+                label: 'Partner Your Salon',
                 icon: Icons.arrow_outward_rounded,
                 onPressed: () => context.go(AppRoutes.contact),
               ),

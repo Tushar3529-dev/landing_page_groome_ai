@@ -44,7 +44,7 @@ class SiteScaffold extends StatelessWidget {
             : [
                 _NavLink(label: 'Home', route: AppRoutes.home),
                 _NavLink(label: 'About', route: AppRoutes.about),
-                _NavLink(label: 'Features', route: AppRoutes.features),
+                // _NavLink(label: 'Features', route: AppRoutes.features),
                 _NavLink(label: 'Contact', route: AppRoutes.contact),
                 const SizedBox(width: 26),
                 AppButton(
@@ -162,7 +162,7 @@ class SiteFooter extends StatelessWidget {
     final mobile = context.isMobile;
     const quickLinks = [
       _FooterRoute(label: 'About Us', route: AppRoutes.about),
-      _FooterRoute(label: 'Features', route: AppRoutes.features),
+      // _FooterRoute(label: 'Features', route: AppRoutes.features),
       _FooterRoute(label: 'Contact', route: AppRoutes.contact),
     ];
     const policyLinks = [
@@ -476,24 +476,24 @@ class _SocialLinks extends StatelessWidget {
         icon: Icons.camera_alt_outlined,
         url: SiteContent.instagramUrl,
       ),
-      _SocialIcon(
-        label: 'LinkedIn',
-        handle: SiteContent.linkedInHandle,
-        icon: Icons.work_outline_rounded,
-        url: SiteContent.linkedInUrl,
-      ),
-      _SocialIcon(
-        label: 'YouTube',
-        handle: SiteContent.youtubeHandle,
-        icon: Icons.play_arrow_rounded,
-        url: SiteContent.youtubeUrl,
-      ),
-      _SocialIcon(
-        label: 'X',
-        handle: SiteContent.xHandle,
-        icon: Icons.alternate_email_rounded,
-        url: SiteContent.xUrl,
-      ),
+      // _SocialIcon(
+      //   label: 'LinkedIn',
+      //   handle: SiteContent.linkedInHandle,
+      //   icon: Icons.work_outline_rounded,
+      //   url: SiteContent.linkedInUrl,
+      // ),
+      // _SocialIcon(
+      //   label: 'YouTube',
+      //   handle: SiteContent.youtubeHandle,
+      //   icon: Icons.play_arrow_rounded,
+      //   url: SiteContent.youtubeUrl,
+      // ),
+      // _SocialIcon(
+      //   label: 'X',
+      //   handle: SiteContent.xHandle,
+      //   icon: Icons.alternate_email_rounded,
+      //   url: SiteContent.xUrl,
+      // ),
     ],
   );
 }

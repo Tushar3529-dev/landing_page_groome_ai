@@ -37,7 +37,7 @@ abstract final class SiteContent {
 
   // Edit these dummy social handles and URLs before launch.
   static const instagramHandle = '@groome.in';
-  static const instagramUrl = 'https://www.instagram.com/groome.in';
+  static const instagramUrl = 'https://www.instagram.com/joingroome?utm_source=qr';
   static const linkedInHandle = 'Groome';
   static const linkedInUrl = 'https://www.linkedin.com/company/groome-app';
   static const youtubeHandle = '@groome';

@@ -123,7 +123,7 @@ class _MobileMenu extends StatelessWidget {
             for (final item in const [
               ('Home', AppRoutes.home),
               ('About', AppRoutes.about),
-              ('Features', AppRoutes.features),
+              // ('Features', AppRoutes.features),
               ('Contact', AppRoutes.contact),
             ])
               ListTile(

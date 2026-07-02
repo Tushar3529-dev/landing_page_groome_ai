@@ -43,7 +43,7 @@ class GroomeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp.router(
-    title: 'Groome - Bring Your Salon Online',
+    title: 'Groome',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
     routerConfig: _router,

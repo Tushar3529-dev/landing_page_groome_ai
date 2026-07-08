@@ -16,6 +16,7 @@ class SiteScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mobile = context.isMobile;
+    final compactNav = context.screenWidth < 900;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: mobile ? 68 : 78,
@@ -30,7 +31,7 @@ class SiteScaffold extends StatelessWidget {
           onTap: () => context.go(AppRoutes.home),
           child: const BrandLogo(),
         ),
-        actions: mobile
+        actions: compactNav
             ? [
                 Builder(
                   builder: (context) => IconButton(
@@ -45,17 +46,23 @@ class SiteScaffold extends StatelessWidget {
                 _NavLink(label: 'Home', route: AppRoutes.home),
                 _NavLink(label: 'About', route: AppRoutes.about),
                 // _NavLink(label: 'Features', route: AppRoutes.features),
-                _NavLink(label: 'Contact', route: AppRoutes.contact),
-                const SizedBox(width: 26),
+                const SizedBox(width: 18),
                 AppButton(
                   label: 'Contact us',
                   icon: Icons.arrow_outward_rounded,
                   onPressed: () => context.go(AppRoutes.contact),
                 ),
-                SizedBox(width: context.pagePadding),
+                const SizedBox(width: 12),
+                AppButton(
+                  label: 'Go to Dashboard',
+                  outlined: true,
+                  icon: Icons.dashboard_customize_outlined,
+                  onPressed: () => context.go(AppRoutes.dashboardLogin),
+                ),
+                SizedBox(width: context.pagePadding / 2),
               ],
       ),
-      endDrawer: mobile ? const _MobileMenu() : null,
+      endDrawer: compactNav ? const _MobileMenu() : null,
       body: SelectionArea(child: child),
     );
   }
@@ -125,6 +132,7 @@ class _MobileMenu extends StatelessWidget {
               ('About', AppRoutes.about),
               // ('Features', AppRoutes.features),
               ('Contact', AppRoutes.contact),
+              ('Dashboard', AppRoutes.dashboardLogin),
             ])
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -145,6 +153,16 @@ class _MobileMenu extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 context.go(AppRoutes.contact);
+              },
+            ),
+            const SizedBox(height: 12),
+            AppButton(
+              label: 'Go to Dashboard',
+              outlined: true,
+              expand: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.go(AppRoutes.dashboardLogin);
               },
             ),
           ],

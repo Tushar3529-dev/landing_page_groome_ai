@@ -20,8 +20,11 @@ void main() {
     await tester.pumpWidget(const GroomeApp());
     await tester.pump(const Duration(milliseconds: 900));
 
-    expect(find.textContaining('Bring Your'), findsOneWidget);
-    expect(find.text('Online Booking'), findsOneWidget);
+    expect(
+      find.text('Get discovered. Get booked. Grow your salon.'),
+      findsOneWidget,
+    );
+    expect(find.text('Go to Dashboard'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -34,8 +37,54 @@ void main() {
     await tester.pump(const Duration(milliseconds: 900));
 
     expect(find.byTooltip('Open menu'), findsOneWidget);
-    expect(find.textContaining('Bring Your'), findsOneWidget);
+    expect(
+      find.text('Get discovered. Get booked. Grow your salon.'),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opens dashboard login and blocks stopped subscriptions', (
+    tester,
+  ) async {
+    await _setSurface(tester, const Size(1440, 1200));
+
+    await tester.pumpWidget(const GroomeApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Go to Dashboard'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Create User'), findsNothing);
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'paused@groome.in');
+    await tester.enterText(fields.at(1), 'paused123');
+    await tester.tap(find.text('Log in'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Your subscription is stopped. Please contact with Super Admin.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.enterText(fields.at(0), 'super@groome.in');
+    await tester.enterText(fields.at(1), 'super1234');
+    await tester.tap(find.text('Log in'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Admins'), findsWidgets);
+    await tester.tap(find.text('Admins').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Create User'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Logout'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('groome').first);
+    await tester.pumpAndSettle();
   });
 
   testWidgets('renders about page responsively without layout exceptions', (

@@ -37,6 +37,23 @@ class _AppButtonState extends State<AppButton> {
         ? Colors.transparent
         : (_hovered ? AppColors.goldDark : AppColors.ink);
 
+    final buttonContent = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.label,
+          maxLines: 1,
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: foreground),
+        ),
+        if (widget.icon != null) ...[
+          const SizedBox(width: 9),
+          Icon(widget.icon, size: 18, color: foreground),
+        ],
+      ],
+    );
+
     final child = MouseRegion(
       cursor: widget.onPressed == null
           ? SystemMouseCursors.basic
@@ -71,14 +88,8 @@ class _AppButtonState extends State<AppButton> {
             borderRadius: BorderRadius.circular(999),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: widget.expand
-                    ? MainAxisSize.max
-                    : MainAxisSize.min,
-                children: [
-                  if (widget.loading)
-                    SizedBox(
+              child: widget.loading
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
@@ -86,20 +97,7 @@ class _AppButtonState extends State<AppButton> {
                         color: foreground,
                       ),
                     )
-                  else ...[
-                    Text(
-                      widget.label,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.labelLarge?.copyWith(color: foreground),
-                    ),
-                    if (widget.icon != null) ...[
-                      const SizedBox(width: 9),
-                      Icon(widget.icon, size: 18, color: foreground),
-                    ],
-                  ],
-                ],
-              ),
+                  : FittedBox(fit: BoxFit.scaleDown, child: buttonContent),
             ),
           ),
         ),

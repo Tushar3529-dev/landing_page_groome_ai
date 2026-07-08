@@ -24,6 +24,8 @@ abstract final class AppRoutes {
   static const features = '/features';
   static const contact = '/contact';
   static const about = '/about';
+  static const dashboardLogin = '/login';
+  static const dashboard = '/dashboard';
   static const privacyPolicy = '/privacy-policy';
   static const termsConditions = '/terms-and-conditions';
 }

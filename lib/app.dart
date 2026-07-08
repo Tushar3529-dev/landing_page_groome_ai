@@ -7,6 +7,7 @@ import 'package:landing_groom_page/core/themes/app_theme.dart';
 import 'package:landing_groom_page/features/about/presentation/pages/about_page.dart';
 import 'package:landing_groom_page/features/contact/presentation/cubit/contact_cubit.dart';
 import 'package:landing_groom_page/features/contact/presentation/pages/contact_page.dart';
+import 'package:landing_groom_page/features/dashboard/presentation/pages/dashboard_page.dart';
 // import 'package:landing_groom_page/features/features/presentation/pages/features_page.dart';
 import 'package:landing_groom_page/features/home/presentation/pages/home_page.dart';
 import 'package:landing_groom_page/features/legal/presentation/pages/legal_page.dart';
@@ -17,6 +18,14 @@ final _router = GoRouter(
     GoRoute(path: AppRoutes.home, builder: (_, _) => const HomePage()),
     // GoRoute(path: AppRoutes.features, builder: (_, _) => const FeaturesPage()),
     GoRoute(path: AppRoutes.about, builder: (_, _) => const AboutPage()),
+    GoRoute(
+      path: AppRoutes.dashboardLogin,
+      builder: (_, _) => const DashboardLoginPage(),
+    ),
+    GoRoute(
+      path: AppRoutes.dashboard,
+      builder: (_, _) => const DashboardPage(),
+    ),
     GoRoute(
       path: AppRoutes.privacyPolicy,
       builder: (_, _) =>

@@ -6,10 +6,8 @@ import 'package:landing_groom_page/core/utils/responsive.dart';
 import 'package:landing_groom_page/core/widgets/app_button.dart';
 import 'package:landing_groom_page/core/widgets/brand_logo.dart';
 import 'package:landing_groom_page/core/widgets/site_scaffold.dart';
-
-final groomeDashboardStore = DashboardStore.seeded();
-
-enum DashboardRole { superAdmin, salonAdmin }
+import 'package:landing_groom_page/features/dashboard/domain/entities/dashboard_entities.dart';
+import 'package:landing_groom_page/features/dashboard/presentation/controllers/dashboard_controller.dart';
 
 enum DashboardSection {
   overview,
@@ -57,801 +55,6 @@ extension DashboardSectionData on DashboardSection {
       this != DashboardSection.admins || role == DashboardRole.superAdmin;
 }
 
-class DashboardLoginResult {
-  const DashboardLoginResult({required this.success, this.message});
-
-  final bool success;
-  final String? message;
-}
-
-class DashboardUser {
-  DashboardUser({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.password,
-    required this.role,
-    required this.subscriptionActive,
-    required this.primarySalonName,
-  });
-
-  final String id;
-  String name;
-  String email;
-  String password;
-  final DashboardRole role;
-  bool subscriptionActive;
-  String primarySalonName;
-}
-
-class SalonProfile {
-  SalonProfile({
-    required this.id,
-    required this.ownerUserId,
-    required this.name,
-    required this.locality,
-    required this.address,
-    required this.phone,
-    required this.email,
-    required this.about,
-    required this.openingTime,
-    required this.closingTime,
-    required this.acceptingBookings,
-  });
-
-  final String id;
-  final String ownerUserId;
-  String name;
-  String locality;
-  String address;
-  String phone;
-  String email;
-  String about;
-  String openingTime;
-  String closingTime;
-  bool acceptingBookings;
-}
-
-class TeamMember {
-  TeamMember({
-    required this.id,
-    required this.salonId,
-    required this.name,
-    required this.role,
-    required this.experience,
-    required this.workingDays,
-    required this.workingHours,
-    required this.breakTime,
-    required this.services,
-    required this.active,
-    required this.rating,
-    required this.bookingsThisMonth,
-    required this.revenue,
-  });
-
-  final String id;
-  final String salonId;
-  String name;
-  String role;
-  String experience;
-  String workingDays;
-  String workingHours;
-  String breakTime;
-  List<String> services;
-  bool active;
-  double rating;
-  int bookingsThisMonth;
-  int revenue;
-}
-
-class ServiceItem {
-  ServiceItem({
-    required this.id,
-    required this.salonId,
-    required this.name,
-    required this.category,
-    required this.durationMinutes,
-    required this.price,
-    required this.teamMemberIds,
-  });
-
-  final String id;
-  final String salonId;
-  String name;
-  String category;
-  int durationMinutes;
-  int price;
-  List<String> teamMemberIds;
-}
-
-class BookingItem {
-  BookingItem({
-    required this.id,
-    required this.salonId,
-    required this.customerName,
-    required this.customerPhone,
-    required this.serviceId,
-    required this.teamMemberId,
-    required this.date,
-    required this.time,
-    required this.status,
-    required this.source,
-    required this.note,
-  });
-
-  final String id;
-  final String salonId;
-  String customerName;
-  String customerPhone;
-  String serviceId;
-  String teamMemberId;
-  String date;
-  String time;
-  String status;
-  String source;
-  String note;
-}
-
-class ClientProfile {
-  ClientProfile({
-    required this.id,
-    required this.salonId,
-    required this.name,
-    required this.phone,
-    required this.totalVisits,
-    required this.totalSpend,
-    required this.lastVisit,
-    required this.noShowCount,
-    required this.notes,
-  });
-
-  final String id;
-  final String salonId;
-  String name;
-  String phone;
-  int totalVisits;
-  int totalSpend;
-  String lastVisit;
-  int noShowCount;
-  String notes;
-}
-
-class DashboardStore extends ChangeNotifier {
-  DashboardStore._();
-
-  factory DashboardStore.seeded() {
-    final store = DashboardStore._();
-    store._users.addAll([
-      DashboardUser(
-        id: 'super-admin',
-        name: 'Super Admin',
-        email: 'super@groome.in',
-        password: 'super1234',
-        role: DashboardRole.superAdmin,
-        subscriptionActive: true,
-        primarySalonName: 'Groome HQ',
-      ),
-      DashboardUser(
-        id: 'looks-admin',
-        name: 'Riya Kapoor',
-        email: 'partner@groome.in',
-        password: 'partner123',
-        role: DashboardRole.salonAdmin,
-        subscriptionActive: true,
-        primarySalonName: 'Looks & Co.',
-      ),
-      DashboardUser(
-        id: 'paused-admin',
-        name: 'Arman Malik',
-        email: 'paused@groome.in',
-        password: 'paused123',
-        role: DashboardRole.salonAdmin,
-        subscriptionActive: false,
-        primarySalonName: 'Urban Glow',
-      ),
-    ]);
-
-    store._salons.addAll([
-      SalonProfile(
-        id: 'looks-main',
-        ownerUserId: 'looks-admin',
-        name: 'Looks & Co.',
-        locality: 'Connaught Place',
-        address: 'Block M, Connaught Place, New Delhi',
-        phone: '+91 98765 43210',
-        email: 'partner@groome.in',
-        about: 'Premium grooming, skin care, and hair studio.',
-        openingTime: '10:00 AM',
-        closingTime: '09:00 PM',
-        acceptingBookings: true,
-      ),
-      SalonProfile(
-        id: 'looks-south',
-        ownerUserId: 'looks-admin',
-        name: 'Looks & Co. South',
-        locality: 'Saket',
-        address: 'Select Citywalk District, Saket, New Delhi',
-        phone: '+91 98765 43211',
-        email: 'saket@groome.in',
-        about: 'Express salon for repeat customers and walk-ins.',
-        openingTime: '11:00 AM',
-        closingTime: '08:30 PM',
-        acceptingBookings: true,
-      ),
-      SalonProfile(
-        id: 'urban-glow',
-        ownerUserId: 'paused-admin',
-        name: 'Urban Glow',
-        locality: 'Gurugram',
-        address: 'Golf Course Road, Gurugram',
-        phone: '+91 98765 43212',
-        email: 'urban@groome.in',
-        about: 'Skin, nails, and bridal makeup studio.',
-        openingTime: '10:30 AM',
-        closingTime: '08:00 PM',
-        acceptingBookings: false,
-      ),
-    ]);
-
-    store._team.addAll([
-      TeamMember(
-        id: 'arjun',
-        salonId: 'looks-main',
-        name: 'Arjun Mehta',
-        role: 'Senior Stylist',
-        experience: '8 years',
-        workingDays: 'Mon-Sat',
-        workingHours: '10:00 AM - 07:00 PM',
-        breakTime: '02:00 PM - 02:30 PM',
-        services: ['Haircut', 'Beard', 'Hair Color'],
-        active: true,
-        rating: 4.9,
-        bookingsThisMonth: 312,
-        revenue: 49000,
-      ),
-      TeamMember(
-        id: 'priya',
-        salonId: 'looks-main',
-        name: 'Priya Sharma',
-        role: 'Beauty Expert',
-        experience: '6 years',
-        workingDays: 'Tue-Sun',
-        workingHours: '11:00 AM - 08:00 PM',
-        breakTime: '03:00 PM - 03:30 PM',
-        services: ['Facial', 'Skin Care', 'Nail Art'],
-        active: true,
-        rating: 4.8,
-        bookingsThisMonth: 278,
-        revenue: 52000,
-      ),
-      TeamMember(
-        id: 'rahul',
-        salonId: 'looks-main',
-        name: 'Rahul Kapoor',
-        role: 'Grooming Specialist',
-        experience: '5 years',
-        workingDays: 'Mon-Fri',
-        workingHours: '10:00 AM - 06:00 PM',
-        breakTime: '01:30 PM - 02:00 PM',
-        services: ['Beard', 'Keratin', 'Haircut'],
-        active: true,
-        rating: 4.7,
-        bookingsThisMonth: 201,
-        revenue: 43000,
-      ),
-      TeamMember(
-        id: 'sneha',
-        salonId: 'looks-main',
-        name: 'Sneha Gupta',
-        role: 'Nail Artist',
-        experience: '4 years',
-        workingDays: 'Wed-Sun',
-        workingHours: '12:00 PM - 09:00 PM',
-        breakTime: '04:00 PM - 04:30 PM',
-        services: ['Nail Art', 'Gel Polish'],
-        active: false,
-        rating: 4.6,
-        bookingsThisMonth: 133,
-        revenue: 28000,
-      ),
-    ]);
-
-    store._services.addAll([
-      ServiceItem(
-        id: 'haircut',
-        salonId: 'looks-main',
-        name: "Men's Haircut",
-        category: 'Hair',
-        durationMinutes: 30,
-        price: 399,
-        teamMemberIds: ['arjun', 'rahul'],
-      ),
-      ServiceItem(
-        id: 'facial',
-        salonId: 'looks-main',
-        name: 'Classic Facial',
-        category: 'Skin Care',
-        durationMinutes: 60,
-        price: 799,
-        teamMemberIds: ['priya'],
-      ),
-      ServiceItem(
-        id: 'beard',
-        salonId: 'looks-main',
-        name: 'Beard Trim',
-        category: 'Grooming',
-        durationMinutes: 20,
-        price: 249,
-        teamMemberIds: ['arjun', 'rahul'],
-      ),
-      ServiceItem(
-        id: 'nails',
-        salonId: 'looks-main',
-        name: 'Nail Art',
-        category: 'Nails',
-        durationMinutes: 45,
-        price: 499,
-        teamMemberIds: ['priya', 'sneha'],
-      ),
-      ServiceItem(
-        id: 'keratin',
-        salonId: 'looks-main',
-        name: 'Keratin Treatment',
-        category: 'Hair',
-        durationMinutes: 180,
-        price: 3999,
-        teamMemberIds: ['rahul'],
-      ),
-    ]);
-
-    store._bookings.addAll([
-      BookingItem(
-        id: 'GRM-001',
-        salonId: 'looks-main',
-        customerName: 'Arjun Mehta',
-        customerPhone: '+91 98111 11111',
-        serviceId: 'haircut',
-        teamMemberId: 'arjun',
-        date: store.today,
-        time: '10:00 AM',
-        status: 'Confirmed',
-        source: 'App',
-        note: 'Prefers low fade.',
-      ),
-      BookingItem(
-        id: 'GRM-002',
-        salonId: 'looks-main',
-        customerName: 'Priya Sharma',
-        customerPhone: '+91 98222 22222',
-        serviceId: 'facial',
-        teamMemberId: 'priya',
-        date: store.today,
-        time: '11:30 AM',
-        status: 'Confirmed',
-        source: 'Manual',
-        note: 'Sensitive skin.',
-      ),
-      BookingItem(
-        id: 'GRM-003',
-        salonId: 'looks-main',
-        customerName: 'Rahul Kapoor',
-        customerPhone: '+91 98333 33333',
-        serviceId: 'beard',
-        teamMemberId: 'rahul',
-        date: store.today,
-        time: '02:00 PM',
-        status: 'Confirmed',
-        source: 'Walk-in',
-        note: '',
-      ),
-      BookingItem(
-        id: 'GRM-004',
-        salonId: 'looks-main',
-        customerName: 'Sneha Gupta',
-        customerPhone: '+91 98444 44444',
-        serviceId: 'nails',
-        teamMemberId: 'priya',
-        date: store.today,
-        time: '03:30 PM',
-        status: 'Confirmed',
-        source: 'App',
-        note: 'Chrome finish.',
-      ),
-      BookingItem(
-        id: 'GRM-005',
-        salonId: 'looks-main',
-        customerName: 'Karan Arora',
-        customerPhone: '+91 98555 55555',
-        serviceId: 'keratin',
-        teamMemberId: 'rahul',
-        date: store.tomorrow,
-        time: '10:00 AM',
-        status: 'Cancelled',
-        source: 'Phone',
-        note: 'Reschedule next week.',
-      ),
-    ]);
-
-    store._clients.addAll([
-      ClientProfile(
-        id: 'client-arjun',
-        salonId: 'looks-main',
-        name: 'Arjun Mehta',
-        phone: '+91 98111 11111',
-        totalVisits: 9,
-        totalSpend: 6200,
-        lastVisit: store.today,
-        noShowCount: 0,
-        notes: 'Likes Arjun for haircut.',
-      ),
-      ClientProfile(
-        id: 'client-priya',
-        salonId: 'looks-main',
-        name: 'Priya Sharma',
-        phone: '+91 98222 22222',
-        totalVisits: 14,
-        totalSpend: 15100,
-        lastVisit: store.today,
-        noShowCount: 1,
-        notes: 'Send skincare reminders.',
-      ),
-      ClientProfile(
-        id: 'client-karan',
-        salonId: 'looks-main',
-        name: 'Karan Arora',
-        phone: '+91 98555 55555',
-        totalVisits: 4,
-        totalSpend: 9800,
-        lastVisit: '2026-05-30',
-        noShowCount: 2,
-        notes: 'Warn before booking peak slots.',
-      ),
-    ]);
-
-    return store;
-  }
-
-  final List<DashboardUser> _users = [];
-  final List<SalonProfile> _salons = [];
-  final List<TeamMember> _team = [];
-  final List<ServiceItem> _services = [];
-  final List<BookingItem> _bookings = [];
-  final List<ClientProfile> _clients = [];
-
-  DashboardUser? currentUser;
-
-  String get today => DateFormat('yyyy-MM-dd').format(DateTime.now());
-  String get tomorrow => DateFormat(
-    'yyyy-MM-dd',
-  ).format(DateTime.now().add(const Duration(days: 1)));
-
-  List<DashboardUser> get users => List.unmodifiable(_users);
-
-  List<SalonProfile> get visibleSalons {
-    final user = currentUser;
-    if (user == null) return const [];
-    if (user.role == DashboardRole.superAdmin) {
-      return List.unmodifiable(_salons);
-    }
-    return _salons.where((salon) => salon.ownerUserId == user.id).toList();
-  }
-
-  DashboardLoginResult signIn(String email, String password) {
-    final normalizedEmail = email.trim().toLowerCase();
-    DashboardUser? match;
-    for (final user in _users) {
-      if (user.email.toLowerCase() == normalizedEmail &&
-          user.password == password) {
-        match = user;
-        break;
-      }
-    }
-
-    if (match == null) {
-      return const DashboardLoginResult(
-        success: false,
-        message: 'Email or password is incorrect.',
-      );
-    }
-
-    if (match.role != DashboardRole.superAdmin && !match.subscriptionActive) {
-      return const DashboardLoginResult(
-        success: false,
-        message:
-            'Your subscription is stopped. Please contact with Super Admin.',
-      );
-    }
-
-    currentUser = match;
-    notifyListeners();
-    return const DashboardLoginResult(success: true);
-  }
-
-  void logout() {
-    currentUser = null;
-    notifyListeners();
-  }
-
-  bool emailExists(String email) =>
-      _users.any((user) => user.email.toLowerCase() == email.toLowerCase());
-
-  void createAdmin({
-    required String name,
-    required String email,
-    required String password,
-    required String salonName,
-  }) {
-    final id = 'admin-${DateTime.now().microsecondsSinceEpoch}';
-    _users.add(
-      DashboardUser(
-        id: id,
-        name: name,
-        email: email,
-        password: password,
-        role: DashboardRole.salonAdmin,
-        subscriptionActive: true,
-        primarySalonName: salonName,
-      ),
-    );
-    _salons.add(
-      SalonProfile(
-        id: 'salon-${DateTime.now().microsecondsSinceEpoch}',
-        ownerUserId: id,
-        name: salonName,
-        locality: 'New Delhi',
-        address: 'Add salon address',
-        phone: '+91 00000 00000',
-        email: email,
-        about: 'New salon onboarded by Super Admin.',
-        openingTime: '10:00 AM',
-        closingTime: '08:00 PM',
-        acceptingBookings: true,
-      ),
-    );
-    notifyListeners();
-  }
-
-  void updatePassword(String userId, String password) {
-    _userById(userId)?.password = password;
-    notifyListeners();
-  }
-
-  void toggleSubscription(String userId) {
-    final user = _userById(userId);
-    if (user == null || user.role == DashboardRole.superAdmin) return;
-    user.subscriptionActive = !user.subscriptionActive;
-    notifyListeners();
-  }
-
-  void deleteUser(String userId) {
-    final user = _userById(userId);
-    if (user == null || user.role == DashboardRole.superAdmin) return;
-    _users.removeWhere((candidate) => candidate.id == userId);
-    final salonIds = _salons
-        .where((salon) => salon.ownerUserId == userId)
-        .map((salon) => salon.id)
-        .toSet();
-    _salons.removeWhere((salon) => salon.ownerUserId == userId);
-    _team.removeWhere((member) => salonIds.contains(member.salonId));
-    _services.removeWhere((service) => salonIds.contains(service.salonId));
-    _bookings.removeWhere((booking) => salonIds.contains(booking.salonId));
-    _clients.removeWhere((client) => salonIds.contains(client.salonId));
-    notifyListeners();
-  }
-
-  void addSalon({
-    required String ownerUserId,
-    required String name,
-    required String locality,
-    required String address,
-    required String phone,
-    required String email,
-  }) {
-    _salons.add(
-      SalonProfile(
-        id: 'salon-${DateTime.now().microsecondsSinceEpoch}',
-        ownerUserId: ownerUserId,
-        name: name,
-        locality: locality,
-        address: address,
-        phone: phone,
-        email: email,
-        about: 'New branch added to Groome.',
-        openingTime: '10:00 AM',
-        closingTime: '08:00 PM',
-        acceptingBookings: true,
-      ),
-    );
-    notifyListeners();
-  }
-
-  void updateSalon(SalonProfile updated) {
-    final index = _salons.indexWhere((salon) => salon.id == updated.id);
-    if (index == -1) return;
-    _salons[index] = updated;
-    _userById(updated.ownerUserId)?.primarySalonName = updated.name;
-    notifyListeners();
-  }
-
-  void toggleSalonBookings(String salonId) {
-    final salon = salonById(salonId);
-    if (salon == null) return;
-    salon.acceptingBookings = !salon.acceptingBookings;
-    notifyListeners();
-  }
-
-  void addTeamMember({
-    required String salonId,
-    required String name,
-    required String role,
-    required String experience,
-  }) {
-    _team.add(
-      TeamMember(
-        id: 'team-${DateTime.now().microsecondsSinceEpoch}',
-        salonId: salonId,
-        name: name,
-        role: role,
-        experience: experience,
-        workingDays: 'Mon-Sat',
-        workingHours: '10:00 AM - 07:00 PM',
-        breakTime: '02:00 PM - 02:30 PM',
-        services: const [],
-        active: true,
-        rating: 4.6,
-        bookingsThisMonth: 0,
-        revenue: 0,
-      ),
-    );
-    notifyListeners();
-  }
-
-  void toggleTeamMember(String memberId) {
-    final member = teamById(memberId);
-    if (member == null) return;
-    member.active = !member.active;
-    notifyListeners();
-  }
-
-  void removeTeamMember(String memberId) {
-    _team.removeWhere((member) => member.id == memberId);
-    for (final service in _services) {
-      service.teamMemberIds.remove(memberId);
-    }
-    notifyListeners();
-  }
-
-  void addService({
-    required String salonId,
-    required String name,
-    required String category,
-    required int durationMinutes,
-    required int price,
-    required List<String> teamMemberIds,
-  }) {
-    _services.add(
-      ServiceItem(
-        id: 'service-${DateTime.now().microsecondsSinceEpoch}',
-        salonId: salonId,
-        name: name,
-        category: category,
-        durationMinutes: durationMinutes,
-        price: price,
-        teamMemberIds: teamMemberIds,
-      ),
-    );
-    notifyListeners();
-  }
-
-  void removeService(String serviceId) {
-    _services.removeWhere((service) => service.id == serviceId);
-    notifyListeners();
-  }
-
-  void addBooking({
-    required String salonId,
-    required String customerName,
-    required String customerPhone,
-    required String serviceId,
-    required String teamMemberId,
-    required String date,
-    required String time,
-    required String source,
-  }) {
-    _bookings.insert(
-      0,
-      BookingItem(
-        id: 'GRM-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
-        salonId: salonId,
-        customerName: customerName,
-        customerPhone: customerPhone,
-        serviceId: serviceId,
-        teamMemberId: teamMemberId,
-        date: date,
-        time: time,
-        status: 'Confirmed',
-        source: source,
-        note: '',
-      ),
-    );
-    final existingClient = _clients.where(
-      (client) =>
-          client.salonId == salonId &&
-          client.phone.replaceAll(' ', '') == customerPhone.replaceAll(' ', ''),
-    );
-    if (existingClient.isEmpty) {
-      _clients.add(
-        ClientProfile(
-          id: 'client-${DateTime.now().microsecondsSinceEpoch}',
-          salonId: salonId,
-          name: customerName,
-          phone: customerPhone,
-          totalVisits: 1,
-          totalSpend: serviceById(serviceId)?.price ?? 0,
-          lastVisit: date,
-          noShowCount: 0,
-          notes: 'Created from manual booking.',
-        ),
-      );
-    }
-    notifyListeners();
-  }
-
-  void cancelBooking(String bookingId) {
-    final booking = bookingById(bookingId);
-    if (booking == null) return;
-    booking.status = 'Cancelled';
-    notifyListeners();
-  }
-
-  List<TeamMember> teamFor(String? salonId) =>
-      _team.where((member) => member.salonId == salonId).toList();
-
-  List<ServiceItem> servicesFor(String? salonId) =>
-      _services.where((service) => service.salonId == salonId).toList();
-
-  List<BookingItem> bookingsFor(String? salonId) =>
-      _bookings.where((booking) => booking.salonId == salonId).toList();
-
-  List<ClientProfile> clientsFor(String? salonId) =>
-      _clients.where((client) => client.salonId == salonId).toList();
-
-  SalonProfile? salonById(String id) {
-    for (final salon in _salons) {
-      if (salon.id == id) return salon;
-    }
-    return null;
-  }
-
-  TeamMember? teamById(String id) {
-    for (final member in _team) {
-      if (member.id == id) return member;
-    }
-    return null;
-  }
-
-  ServiceItem? serviceById(String id) {
-    for (final service in _services) {
-      if (service.id == id) return service;
-    }
-    return null;
-  }
-
-  BookingItem? bookingById(String id) {
-    for (final booking in _bookings) {
-      if (booking.id == id) return booking;
-    }
-    return null;
-  }
-
-  DashboardUser? _userById(String id) {
-    for (final user in _users) {
-      if (user.id == id) return user;
-    }
-    return null;
-  }
-}
-
 class DashboardLoginPage extends StatefulWidget {
   const DashboardLoginPage({super.key});
 
@@ -866,6 +69,12 @@ class _DashboardLoginPageState extends State<DashboardLoginPage> {
   bool _obscure = true;
   bool _loading = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    groomeDashboardStore.initialize();
+  }
 
   @override
   void dispose() {
@@ -883,7 +92,10 @@ class _DashboardLoginPageState extends State<DashboardLoginPage> {
       _error = null;
     });
     await Future<void>.delayed(const Duration(milliseconds: 220));
-    final result = groomeDashboardStore.signIn(_email.text, _password.text);
+    final result = await groomeDashboardStore.signIn(
+      _email.text,
+      _password.text,
+    );
     if (!mounted) return;
 
     setState(() => _loading = false);
@@ -1156,14 +368,22 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _weekMode = false;
 
   @override
+  void initState() {
+    super.initState();
+    groomeDashboardStore.initialize();
+  }
+
+  @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: groomeDashboardStore,
     builder: (context, _) {
       final user = groomeDashboardStore.currentUser;
       if (user == null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) context.go(AppRoutes.dashboardLogin);
-        });
+        if (groomeDashboardStore.authChecked) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go(AppRoutes.dashboardLogin);
+          });
+        }
         return const Scaffold(
           backgroundColor: AppColors.cream,
           body: Center(child: CircularProgressIndicator()),
@@ -1306,7 +526,7 @@ class _DashboardPageState extends State<DashboardPage> {
     };
   }
 
-  SalonProfile? _selectedSalon(DashboardStore store) {
+  SalonProfile? _selectedSalon(DashboardController store) {
     final salons = store.visibleSalons;
     if (salons.isEmpty) return null;
     for (final salon in salons) {
@@ -1316,8 +536,9 @@ class _DashboardPageState extends State<DashboardPage> {
     return salons.first;
   }
 
-  void _logout() {
-    groomeDashboardStore.logout();
+  Future<void> _logout() async {
+    await groomeDashboardStore.logout();
+    if (!mounted) return;
     context.go(AppRoutes.dashboardLogin);
   }
 
@@ -1335,9 +556,9 @@ class _DashboardPageState extends State<DashboardPage> {
         title: 'Add Salon',
         actionLabel: 'Save Salon',
         formKey: formKey,
-        onSubmit: () {
+        onSubmit: () async {
           if (!(formKey.currentState?.validate() ?? false)) return;
-          groomeDashboardStore.addSalon(
+          await groomeDashboardStore.addSalon(
             ownerUserId: user.role == DashboardRole.superAdmin
                 ? groomeDashboardStore.users
                       .firstWhere(
@@ -1352,7 +573,7 @@ class _DashboardPageState extends State<DashboardPage> {
             phone: phone.text.trim(),
             email: email.text.trim(),
           );
-          Navigator.of(dialogContext).pop();
+          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
         },
         children: [
           _DialogField(controller: name, label: 'Salon name'),
@@ -1388,9 +609,9 @@ class _DashboardPageState extends State<DashboardPage> {
         title: 'Edit Salon Profile',
         actionLabel: 'Save Changes',
         formKey: formKey,
-        onSubmit: () {
+        onSubmit: () async {
           if (!(formKey.currentState?.validate() ?? false)) return;
-          groomeDashboardStore.updateSalon(
+          await groomeDashboardStore.updateSalon(
             SalonProfile(
               id: salon.id,
               ownerUserId: salon.ownerUserId,
@@ -1405,7 +626,7 @@ class _DashboardPageState extends State<DashboardPage> {
               acceptingBookings: salon.acceptingBookings,
             ),
           );
-          Navigator.of(dialogContext).pop();
+          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
         },
         children: [
           _DialogField(controller: name, label: 'Salon name'),
@@ -1451,15 +672,15 @@ class _DashboardPageState extends State<DashboardPage> {
         title: 'Add Team Member',
         actionLabel: 'Add Member',
         formKey: formKey,
-        onSubmit: () {
+        onSubmit: () async {
           if (!(formKey.currentState?.validate() ?? false)) return;
-          groomeDashboardStore.addTeamMember(
+          await groomeDashboardStore.addTeamMember(
             salonId: salon.id,
             name: name.text.trim(),
             role: role.text.trim(),
             experience: experience.text.trim(),
           );
-          Navigator.of(dialogContext).pop();
+          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
         },
         children: [
           _DialogField(controller: name, label: 'Full name'),
@@ -1492,9 +713,9 @@ class _DashboardPageState extends State<DashboardPage> {
           title: 'Add Service',
           actionLabel: 'Add Service',
           formKey: formKey,
-          onSubmit: () {
+          onSubmit: () async {
             if (!(formKey.currentState?.validate() ?? false)) return;
-            groomeDashboardStore.addService(
+            await groomeDashboardStore.addService(
               salonId: salon.id,
               name: name.text.trim(),
               category: category.text.trim(),
@@ -1502,7 +723,7 @@ class _DashboardPageState extends State<DashboardPage> {
               price: int.tryParse(price.text.trim()) ?? 0,
               teamMemberIds: selectedTeam.toList(),
             );
-            Navigator.of(dialogContext).pop();
+            if (dialogContext.mounted) Navigator.of(dialogContext).pop();
           },
           children: [
             _DialogField(controller: name, label: 'Service name'),
@@ -1592,9 +813,9 @@ class _DashboardPageState extends State<DashboardPage> {
           title: 'New Appointment',
           actionLabel: 'Save Booking',
           formKey: formKey,
-          onSubmit: () {
+          onSubmit: () async {
             if (!(formKey.currentState?.validate() ?? false)) return;
-            groomeDashboardStore.addBooking(
+            await groomeDashboardStore.addBooking(
               salonId: salon.id,
               customerName: customer.text.trim(),
               customerPhone: phone.text.trim(),
@@ -1604,7 +825,7 @@ class _DashboardPageState extends State<DashboardPage> {
               time: time.text.trim(),
               source: source,
             );
-            Navigator.of(dialogContext).pop();
+            if (dialogContext.mounted) Navigator.of(dialogContext).pop();
           },
           children: [
             _DialogField(controller: phone, label: 'Customer phone'),
@@ -1687,15 +908,15 @@ class _DashboardPageState extends State<DashboardPage> {
         title: 'Create Admin User',
         actionLabel: 'Create User',
         formKey: formKey,
-        onSubmit: () {
+        onSubmit: () async {
           if (!(formKey.currentState?.validate() ?? false)) return;
-          groomeDashboardStore.createAdmin(
+          await groomeDashboardStore.createAdmin(
             name: name.text.trim(),
             email: email.text.trim(),
             password: password.text,
             salonName: salonName.text.trim(),
           );
-          Navigator.of(dialogContext).pop();
+          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
         },
         children: [
           _DialogField(controller: name, label: 'Admin name'),
@@ -1734,10 +955,10 @@ class _DashboardPageState extends State<DashboardPage> {
         title: 'Edit Password',
         actionLabel: 'Save Password',
         formKey: formKey,
-        onSubmit: () {
+        onSubmit: () async {
           if (!(formKey.currentState?.validate() ?? false)) return;
-          groomeDashboardStore.updatePassword(user.id, password.text);
-          Navigator.of(dialogContext).pop();
+          await groomeDashboardStore.updatePassword(user.id, password.text);
+          if (dialogContext.mounted) Navigator.of(dialogContext).pop();
         },
         children: [
           Text(
@@ -2224,7 +1445,7 @@ class _OverviewSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onAddBooking;
   final VoidCallback onAddService;
   final VoidCallback onShowBookings;
@@ -2341,7 +1562,7 @@ class _CalendarSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final bool weekMode;
   final String teamFilter;
   final ValueChanged<bool> onModeChanged;
@@ -2429,7 +1650,7 @@ class _BookingsSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final BookingFilter filter;
   final ValueChanged<BookingFilter> onFilterChanged;
   final VoidCallback onAddBooking;
@@ -2503,7 +1724,7 @@ class _ClientsSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final String query;
   final ValueChanged<String> onQueryChanged;
 
@@ -2560,7 +1781,7 @@ class _SalonsSection extends StatelessWidget {
   });
 
   final DashboardUser user;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onAddSalon;
   final ValueChanged<SalonProfile> onEditSalon;
 
@@ -2617,7 +1838,7 @@ class _TeamSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onAddMember;
 
   @override
@@ -2665,7 +1886,7 @@ class _ServicesSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onAddService;
 
   @override
@@ -2718,7 +1939,7 @@ class _AnalyticsSection extends StatelessWidget {
   const _AnalyticsSection({required this.salon, required this.store});
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
 
   @override
   Widget build(BuildContext context) {
@@ -2795,7 +2016,7 @@ class _SettingsSection extends StatelessWidget {
   });
 
   final SalonProfile salon;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onEditSalon;
 
   @override
@@ -2873,7 +2094,7 @@ class _AdminsSection extends StatelessWidget {
     required this.onEditPassword,
   });
 
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onCreateAdmin;
   final ValueChanged<DashboardUser> onEditPassword;
 
@@ -3188,7 +2409,7 @@ class _RecentBookingsPanel extends StatelessWidget {
   });
 
   final List<BookingItem> bookings;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onShowBookings;
 
   @override
@@ -3230,7 +2451,7 @@ class _BookingRow extends StatelessWidget {
   });
 
   final BookingItem booking;
-  final DashboardStore store;
+  final DashboardController store;
   final bool compact;
 
   @override
@@ -3318,7 +2539,7 @@ class _CalendarSlot extends StatelessWidget {
 
   final String slot;
   final List<BookingItem> bookings;
-  final DashboardStore store;
+  final DashboardController store;
   final VoidCallback onEmptyTap;
 
   @override
@@ -3514,7 +2735,7 @@ class _TeamMemberCard extends StatelessWidget {
   const _TeamMemberCard({required this.member, required this.store});
 
   final TeamMember member;
-  final DashboardStore store;
+  final DashboardController store;
 
   @override
   Widget build(BuildContext context) => _Panel(
@@ -3605,7 +2826,7 @@ class _ServiceRow extends StatelessWidget {
   const _ServiceRow({required this.service, required this.store});
 
   final ServiceItem service;
-  final DashboardStore store;
+  final DashboardController store;
 
   @override
   Widget build(BuildContext context) {
@@ -4074,7 +3295,7 @@ class _FormDialog extends StatelessWidget {
   final String actionLabel;
   final GlobalKey<FormState> formKey;
   final List<Widget> children;
-  final VoidCallback onSubmit;
+  final Future<void> Function() onSubmit;
 
   @override
   Widget build(BuildContext context) => AlertDialog(

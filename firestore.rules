@@ -2,6 +2,138 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return signedIn() && request.auth.token.role == 'superAdmin';
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function salonPath(salonId) {
+      return /databases/$(database)/documents/salons/$(salonId);
+    }
+
+    function isSalonOwner(salonId) {
+      return signedIn() &&
+        exists(salonPath(salonId)) &&
+        get(salonPath(salonId)).data.ownerUserId == request.auth.uid;
+    }
+
+    function canAccessSalon(salonId) {
+      return isSuperAdmin() || isSalonOwner(salonId);
+    }
+
+    function isShortText(value, min, max) {
+      return value is string &&
+        value.size() >= min &&
+        value.size() <= max;
+    }
+
+    function validSalon(data) {
+      return data.keys().hasOnly([
+        'ownerUserId', 'name', 'locality', 'address', 'phone', 'email',
+        'about', 'openingTime', 'closingTime', 'acceptingBookings',
+        'createdAt', 'updatedAt'
+      ]) &&
+        isShortText(data.ownerUserId, 1, 160) &&
+        isShortText(data.name, 2, 160) &&
+        isShortText(data.locality, 2, 120) &&
+        isShortText(data.address, 2, 300) &&
+        isShortText(data.phone, 2, 30) &&
+        isShortText(data.email, 5, 254) &&
+        data.about is string &&
+        data.about.size() <= 1000 &&
+        isShortText(data.openingTime, 2, 30) &&
+        isShortText(data.closingTime, 2, 30) &&
+        data.acceptingBookings is bool;
+    }
+
+    function validTeamMember(data) {
+      return data.keys().hasOnly([
+        'salonId', 'name', 'role', 'experience', 'workingDays',
+        'workingHours', 'breakTime', 'services', 'active', 'rating',
+        'bookingsThisMonth', 'revenue', 'createdAt', 'updatedAt'
+      ]) &&
+        isShortText(data.salonId, 1, 160) &&
+        isShortText(data.name, 2, 120) &&
+        isShortText(data.role, 2, 120) &&
+        isShortText(data.experience, 1, 40) &&
+        isShortText(data.workingDays, 1, 80) &&
+        isShortText(data.workingHours, 1, 80) &&
+        data.breakTime is string &&
+        data.breakTime.size() <= 80 &&
+        data.services is list &&
+        data.active is bool &&
+        data.rating is number &&
+        data.bookingsThisMonth is int &&
+        data.revenue is int;
+    }
+
+    function validService(data) {
+      return data.keys().hasOnly([
+        'salonId', 'name', 'category', 'durationMinutes', 'price',
+        'teamMemberIds', 'createdAt', 'updatedAt'
+      ]) &&
+        isShortText(data.salonId, 1, 160) &&
+        isShortText(data.name, 2, 160) &&
+        isShortText(data.category, 2, 120) &&
+        data.durationMinutes is int &&
+        data.durationMinutes >= 5 &&
+        data.durationMinutes <= 720 &&
+        data.price is int &&
+        data.price >= 0 &&
+        data.teamMemberIds is list;
+    }
+
+    function validBooking(data) {
+      return data.keys().hasOnly([
+        'salonId', 'customerName', 'customerPhone', 'serviceId',
+        'teamMemberId', 'date', 'time', 'status', 'source', 'note',
+        'createdAt', 'updatedAt'
+      ]) &&
+        isShortText(data.salonId, 1, 160) &&
+        isShortText(data.customerName, 2, 120) &&
+        isShortText(data.customerPhone, 2, 30) &&
+        isShortText(data.serviceId, 1, 160) &&
+        isShortText(data.teamMemberId, 1, 160) &&
+        isShortText(data.date, 8, 20) &&
+        isShortText(data.time, 2, 30) &&
+        data.status in [
+          'Pending', 'Confirmed', 'In Progress', 'Completed', 'Cancelled',
+          'No Show'
+        ] &&
+        data.source in ['App', 'Manual', 'Walk-in', 'Phone'] &&
+        data.note is string &&
+        data.note.size() <= 1000;
+    }
+
+    function validClient(data) {
+      return data.keys().hasOnly([
+        'salonId', 'name', 'phone', 'phoneNormalized', 'totalVisits',
+        'totalSpend', 'lastVisit', 'noShowCount', 'notes',
+        'createdAt', 'updatedAt'
+      ]) &&
+        isShortText(data.salonId, 1, 160) &&
+        isShortText(data.name, 2, 120) &&
+        isShortText(data.phone, 2, 30) &&
+        isShortText(data.phoneNormalized, 2, 30) &&
+        data.totalVisits is int &&
+        data.totalVisits >= 0 &&
+        data.totalSpend is int &&
+        data.totalSpend >= 0 &&
+        data.lastVisit is string &&
+        data.lastVisit.size() <= 20 &&
+        data.noShowCount is int &&
+        data.noShowCount >= 0 &&
+        data.notes is string &&
+        data.notes.size() <= 2000;
+    }
+
     match /contact_leads/{leadId} {
       allow create: if
         request.resource.data.keys().hasOnly([
@@ -22,6 +154,85 @@ service cloud.firestore {
         request.resource.data.createdAt == request.time;
 
       allow read, update, delete: if false;
+    }
+
+    match /dashboard_users/{userId} {
+      allow read: if isSuperAdmin() || isSelf(userId);
+      allow create, update, delete: if false;
+    }
+
+    match /salons/{salonId} {
+      allow read: if isSuperAdmin() ||
+        (signedIn() && resource.data.ownerUserId == request.auth.uid);
+      allow create: if signedIn() &&
+        validSalon(request.resource.data) &&
+        request.resource.data.updatedAt == request.time &&
+        request.resource.data.createdAt == request.time &&
+        (
+          isSuperAdmin() ||
+          request.resource.data.ownerUserId == request.auth.uid
+        );
+      allow update: if signedIn() &&
+        validSalon(request.resource.data) &&
+        request.resource.data.ownerUserId == resource.data.ownerUserId &&
+        request.resource.data.updatedAt == request.time &&
+        (
+          isSuperAdmin() ||
+          resource.data.ownerUserId == request.auth.uid
+        );
+      allow delete: if false;
+    }
+
+    match /team_members/{memberId} {
+      allow read: if canAccessSalon(resource.data.salonId);
+      allow create: if validTeamMember(request.resource.data) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(request.resource.data.salonId);
+      allow update: if validTeamMember(request.resource.data) &&
+        request.resource.data.salonId == resource.data.salonId &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(resource.data.salonId);
+      allow delete: if canAccessSalon(resource.data.salonId);
+    }
+
+    match /services/{serviceId} {
+      allow read: if canAccessSalon(resource.data.salonId);
+      allow create: if validService(request.resource.data) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(request.resource.data.salonId);
+      allow update: if validService(request.resource.data) &&
+        request.resource.data.salonId == resource.data.salonId &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(resource.data.salonId);
+      allow delete: if canAccessSalon(resource.data.salonId);
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if canAccessSalon(resource.data.salonId);
+      allow create: if validBooking(request.resource.data) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(request.resource.data.salonId);
+      allow update: if validBooking(request.resource.data) &&
+        request.resource.data.salonId == resource.data.salonId &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(resource.data.salonId);
+      allow delete: if canAccessSalon(resource.data.salonId);
+    }
+
+    match /clients/{clientId} {
+      allow read: if canAccessSalon(resource.data.salonId);
+      allow create: if validClient(request.resource.data) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(request.resource.data.salonId);
+      allow update: if validClient(request.resource.data) &&
+        request.resource.data.salonId == resource.data.salonId &&
+        request.resource.data.updatedAt == request.time &&
+        canAccessSalon(resource.data.salonId);
+      allow delete: if canAccessSalon(resource.data.salonId);
     }
   }
 }

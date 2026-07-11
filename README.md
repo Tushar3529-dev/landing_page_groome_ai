@@ -7,9 +7,9 @@ business management platform.
 
 The app follows feature-first Clean Architecture:
 
-- `presentation`: pages, reusable widgets, and `ContactCubit`
-- `domain`: `ContactLead`, repository contract, and submit use case
-- `data`: Firestore datasource and repository implementation
+- `presentation`: pages, reusable widgets, controllers, and `ContactCubit`
+- `domain`: entities, repository contracts, and use cases
+- `data`: Firebase datasources and repository implementations
 - `core`: theme, responsive helpers, shared widgets, constants, and services
 
 Dependencies are registered with `get_it`, navigation uses `go_router`, and
@@ -17,7 +17,8 @@ presentation state uses `flutter_bloc`.
 
 ## Firebase setup
 
-1. Create a Firebase project with Firestore, Hosting, and Cloud Functions.
+1. Create a Firebase project with Authentication, Firestore, Hosting, and Cloud
+   Functions. Enable the Email/Password sign-in provider in Authentication.
 2. The included `.firebaserc` targets `groom-ai-d91fe`. Update it if you move
    this app to another Firebase project.
 3. Add the Gmail App Password for `support@groome.net` as a Secret Manager
@@ -30,7 +31,19 @@ presentation state uses `flutter_bloc`.
    Use a Gmail App Password for `support@groome.net`, never the account
    password.
 
-4. Resolve packages:
+4. Add a one-time bootstrap secret for creating the first dashboard Super Admin:
+
+   ```powershell
+   firebase functions:secrets:set BOOTSTRAP_ADMIN_KEY
+   ```
+
+   After deploying Functions, call the `bootstrapSuperAdmin` callable once with
+   `bootstrapKey`, `name`, `email`, and `password`. That creates the Firebase
+   Auth user, sets the `superAdmin` custom claim, and writes
+   `dashboard_users/{uid}`. After that, all admin users are created inside the
+   dashboard by Super Admin.
+
+5. Resolve packages:
 
    ```powershell
    flutter pub get
@@ -120,13 +133,31 @@ firebase deploy --only functions
 firebase functions:log --only notifyOwnerOfNewLead
 ```
 
+## Dashboard backend
+
+The dashboard uses Firebase Auth for login and Firestore for live data:
+
+- `dashboard_users/{uid}` stores role, subscription state, and profile metadata.
+- `salons` stores salon branches owned by dashboard users.
+- `team_members`, `services`, `bookings`, and `clients` store salon operations
+  with a `salonId` field.
+- Super Admin-only actions run through callable Functions:
+  `createDashboardAdmin`, `setDashboardUserPassword`,
+  `setDashboardSubscription`, and `deleteDashboardUser`.
+
+Stopped subscriptions remain enabled in Firebase Auth so the app can show the
+exact message: "Your subscription is stopped. Please contact with Super Admin."
+The login flow signs the user back out immediately after reading the stopped
+subscription flag.
+
 ## Deploy
 
 ```powershell
 firebase deploy
 ```
 
-This deploys Hosting, Firestore rules, and the lead notification function.
+This deploys Hosting, Firestore rules/indexes, dashboard Functions, and the lead
+notification function.
 
 ## SEO notes
 

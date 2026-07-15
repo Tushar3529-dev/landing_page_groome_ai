@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:landing_groom_page/core/constants/app_constants.dart';
@@ -108,59 +109,68 @@ class _DashboardLoginPageState extends State<DashboardLoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final mobile = context.isMobile;
-    final loginCard = _LoginCard(
-      formKey: _formKey,
-      email: _email,
-      password: _password,
-      obscure: _obscure,
-      loading: _loading,
-      error: _error,
-      onTogglePassword: () => setState(() => _obscure = !_obscure),
-      onSubmit: _submit,
-    );
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: groomeDashboardStore,
+    builder: (context, _) {
+      if (groomeDashboardStore.currentUser != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) context.go(AppRoutes.dashboard);
+        });
+      }
 
-    return SiteScaffold(
-      child: ColoredBox(
-        color: AppColors.cream,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              context.pagePadding,
-              mobile ? 54 : 84,
-              context.pagePadding,
-              mobile ? 70 : 112,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppBreakpoints.contentMax,
+      final mobile = context.isMobile;
+      final loginCard = _LoginCard(
+        formKey: _formKey,
+        email: _email,
+        password: _password,
+        obscure: _obscure,
+        loading: _loading,
+        error: _error,
+        onTogglePassword: () => setState(() => _obscure = !_obscure),
+        onSubmit: _submit,
+      );
+
+      return SiteScaffold(
+        child: ColoredBox(
+          color: AppColors.cream,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                context.pagePadding,
+                mobile ? 54 : 84,
+                context.pagePadding,
+                mobile ? 70 : 112,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppBreakpoints.contentMax,
+                  ),
+                  child: mobile
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const _LoginIntro(),
+                            const SizedBox(height: 34),
+                            loginCard,
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Expanded(flex: 5, child: _LoginIntro()),
+                            const SizedBox(width: 72),
+                            Expanded(flex: 4, child: loginCard),
+                          ],
+                        ),
                 ),
-                child: mobile
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _LoginIntro(),
-                          const SizedBox(height: 34),
-                          loginCard,
-                        ],
-                      )
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Expanded(flex: 5, child: _LoginIntro()),
-                          const SizedBox(width: 72),
-                          Expanded(flex: 4, child: loginCard),
-                        ],
-                      ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
 }
 
 class _LoginIntro extends StatelessWidget {
@@ -933,7 +943,12 @@ class _DashboardPageState extends State<DashboardPage> {
               return null;
             },
           ),
-          _DialogField(controller: password, label: 'Password'),
+          _DialogField(
+            controller: password,
+            label: 'Password',
+            obscureText: true,
+            validator: _passwordValidator,
+          ),
           _DialogField(controller: salonName, label: 'Salon name'),
         ],
       ),
@@ -968,12 +983,23 @@ class _DashboardPageState extends State<DashboardPage> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          _DialogField(controller: password, label: 'New password'),
+          _DialogField(
+            controller: password,
+            label: 'New password',
+            obscureText: true,
+            validator: _passwordValidator,
+          ),
         ],
       ),
     );
 
     password.dispose();
+  }
+
+  String? _passwordValidator(String? value) {
+    if (value == null || value.isEmpty) return 'Required';
+    if (value.length < 8) return 'Use at least 8 characters';
+    return null;
   }
 }
 
@@ -3282,7 +3308,34 @@ class _EmptyInline extends StatelessWidget {
   );
 }
 
-class _FormDialog extends StatelessWidget {
+enum _NoticeTone { danger }
+
+class _InlineNotice extends StatelessWidget {
+  const _InlineNotice({required this.message, required this.tone});
+
+  final String message;
+  final _NoticeTone tone;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFF1F0),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: const Color(0xFFFFC9C5)),
+    ),
+    child: Text(
+      message,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: const Color(0xFFB42318),
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+}
+
+class _FormDialog extends StatefulWidget {
   const _FormDialog({
     required this.title,
     required this.actionLabel,
@@ -3298,23 +3351,65 @@ class _FormDialog extends StatelessWidget {
   final Future<void> Function() onSubmit;
 
   @override
+  State<_FormDialog> createState() => _FormDialogState();
+}
+
+class _FormDialogState extends State<_FormDialog> {
+  bool _submitting = false;
+  String? _error;
+
+  Future<void> _submit() async {
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+
+    try {
+      await widget.onSubmit();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = _actionErrorMessage(error));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  String _actionErrorMessage(Object error) {
+    if (error is FirebaseFunctionsException) {
+      final message = error.message;
+      if (message != null && message.trim().isNotEmpty) return message;
+
+      return switch (error.code) {
+        'already-exists' => 'An account already exists for this email.',
+        'permission-denied' => 'Only Super Admin can perform this action.',
+        'unauthenticated' => 'Please log in again to continue.',
+        _ => 'Could not complete this action. Please try again.',
+      };
+    }
+
+    return 'Could not complete this action. Please try again.';
+  }
+
+  @override
   Widget build(BuildContext context) => AlertDialog(
     backgroundColor: AppColors.white,
     surfaceTintColor: Colors.transparent,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    title: Text(title),
+    title: Text(widget.title),
     content: SizedBox(
       width: 520,
       child: SingleChildScrollView(
         child: Form(
-          key: formKey,
+          key: widget.formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              for (final child in children) ...[
+              for (final child in widget.children) ...[
                 child,
                 const SizedBox(height: 14),
               ],
+              if (_error != null)
+                _InlineNotice(message: _error!, tone: _NoticeTone.danger),
             ],
           ),
         ),
@@ -3322,16 +3417,21 @@ class _FormDialog extends StatelessWidget {
     ),
     actions: [
       TextButton(
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: _submitting ? null : () => Navigator.of(context).pop(),
         child: const Text('Cancel'),
       ),
       ElevatedButton(
-        onPressed: onSubmit,
+        onPressed: _submitting ? null : _submit,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.ink,
           foregroundColor: AppColors.white,
         ),
-        child: Text(actionLabel),
+        child: _submitting
+            ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(widget.actionLabel),
       ),
     ],
   );
@@ -3344,6 +3444,7 @@ class _DialogField extends StatelessWidget {
     this.maxLines = 1,
     this.keyboardType,
     this.validator,
+    this.obscureText = false,
   });
 
   final TextEditingController controller;
@@ -3351,12 +3452,14 @@ class _DialogField extends StatelessWidget {
   final int maxLines;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
+  final bool obscureText;
 
   @override
   Widget build(BuildContext context) => TextFormField(
     controller: controller,
     maxLines: maxLines,
     keyboardType: keyboardType,
+    obscureText: obscureText,
     decoration: InputDecoration(labelText: label),
     validator:
         validator ??

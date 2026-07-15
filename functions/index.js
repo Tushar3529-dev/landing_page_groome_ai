@@ -175,11 +175,31 @@ const createDashboardAdminHandler = async (request) => {
 
   const auth = getAuth();
   const db = getFirestore();
-  const userRecord = await auth.createUser({
-    email,
-    password,
-    displayName: name,
-  });
+  let userRecord;
+
+  try {
+    userRecord = await auth.createUser({
+      email,
+      password,
+      displayName: name,
+    });
+  } catch (error) {
+    if (error.code === "auth/email-already-exists") {
+      throw new HttpsError(
+        "already-exists",
+        "An account already exists for this email.",
+      );
+    }
+
+    if (error.code === "auth/invalid-password") {
+      throw new HttpsError(
+        "invalid-argument",
+        "Password must be at least 8 characters.",
+      );
+    }
+
+    throw error;
+  }
 
   await auth.setCustomUserClaims(userRecord.uid, {role: "salonAdmin"});
 

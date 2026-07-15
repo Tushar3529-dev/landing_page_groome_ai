@@ -41,8 +41,15 @@ class FirebaseDashboardDatasource {
 
   Future<DashboardLoginResult> signIn(String email, String password) async {
     try {
+      final normalizedEmail = email.trim().toLowerCase();
+      final currentUser = _auth.currentUser;
+      if (currentUser != null &&
+          currentUser.email?.toLowerCase() == normalizedEmail) {
+        return _loginResultForUid(currentUser.uid);
+      }
+
       final credential = await _auth.signInWithEmailAndPassword(
-        email: email.trim(),
+        email: normalizedEmail,
         password: password,
       );
       final uid = credential.user?.uid;
@@ -53,26 +60,7 @@ class FirebaseDashboardDatasource {
         );
       }
 
-      final user = await dashboardUser(uid);
-      if (user == null) {
-        await _auth.signOut();
-        return const DashboardLoginResult(
-          success: false,
-          message:
-              'Dashboard account is not set up. Please contact Super Admin.',
-        );
-      }
-
-      if (user.role != DashboardRole.superAdmin && !user.subscriptionActive) {
-        await _auth.signOut();
-        return const DashboardLoginResult(
-          success: false,
-          message:
-              'Your subscription is stopped. Please contact with Super Admin.',
-        );
-      }
-
-      return DashboardLoginResult(success: true, user: user);
+      return _loginResultForUid(uid);
     } on FirebaseAuthException catch (error) {
       return DashboardLoginResult(success: false, message: _authMessage(error));
     } catch (_) {
@@ -81,6 +69,28 @@ class FirebaseDashboardDatasource {
         message: 'Unable to login right now. Please try again.',
       );
     }
+  }
+
+  Future<DashboardLoginResult> _loginResultForUid(String uid) async {
+    final user = await dashboardUser(uid);
+    if (user == null) {
+      await _auth.signOut();
+      return const DashboardLoginResult(
+        success: false,
+        message: 'Dashboard account is not set up. Please contact Super Admin.',
+      );
+    }
+
+    if (user.role != DashboardRole.superAdmin && !user.subscriptionActive) {
+      await _auth.signOut();
+      return const DashboardLoginResult(
+        success: false,
+        message:
+            'Your subscription is stopped. Please contact with Super Admin.',
+      );
+    }
+
+    return DashboardLoginResult(success: true, user: user);
   }
 
   Future<DashboardUser?> dashboardUser(String uid) async {
@@ -158,6 +168,7 @@ class FirebaseDashboardDatasource {
     required String password,
     required String salonName,
   }) async {
+    await _refreshAuthToken();
     await _functions.httpsCallable('createDashboardAdmin').call({
       'name': name,
       'email': email,
@@ -167,6 +178,7 @@ class FirebaseDashboardDatasource {
   }
 
   Future<void> updatePassword(String userId, String password) async {
+    await _refreshAuthToken();
     await _functions.httpsCallable('setDashboardUserPassword').call({
       'userId': userId,
       'password': password,
@@ -174,6 +186,7 @@ class FirebaseDashboardDatasource {
   }
 
   Future<void> setSubscription(String userId, bool active) async {
+    await _refreshAuthToken();
     await _functions.httpsCallable('setDashboardSubscription').call({
       'userId': userId,
       'subscriptionActive': active,
@@ -181,9 +194,14 @@ class FirebaseDashboardDatasource {
   }
 
   Future<void> deleteUser(String userId) async {
+    await _refreshAuthToken();
     await _functions.httpsCallable('deleteDashboardUser').call({
       'userId': userId,
     });
+  }
+
+  Future<void> _refreshAuthToken() async {
+    await _auth.currentUser?.getIdToken(true);
   }
 
   Future<void> addSalon({
@@ -541,7 +559,14 @@ class FirebaseDashboardDatasource {
       case 'too-many-requests':
         return 'Too many login attempts. Please try again later.';
       default:
-        return error.message ?? 'Unable to login right now. Please try again.';
+        final message = error.message;
+        if (message == null ||
+            message.contains('dev.flutter.pigeon') ||
+            message.contains('FirebaseAuthHostApi') ||
+            message.contains('channel-error')) {
+          return 'Unable to reach Firebase login. Please refresh the page and try again.';
+        }
+        return message;
     }
   }
 

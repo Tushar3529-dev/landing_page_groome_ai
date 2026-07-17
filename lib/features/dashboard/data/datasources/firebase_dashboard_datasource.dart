@@ -62,6 +62,10 @@ class FirebaseDashboardDatasource {
 
       return _loginResultForUid(uid);
     } on FirebaseAuthException catch (error) {
+      // ignore: avoid_print
+      print(
+        'Groome dashboard login failed: code=${error.code}; message=${error.message}',
+      );
       return DashboardLoginResult(success: false, message: _authMessage(error));
     } catch (_) {
       return const DashboardLoginResult(

@@ -47,6 +47,72 @@
 </head>
 <body>
   <noscript>Groome helps salons grow with online booking, customer management, and WhatsApp notifications. JavaScript is required to use this website.</noscript>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    (function () {
+      var reloadKey = 'groome_legacy_service_worker_cleared_20260717';
+      var assetVersion = 'groome-auth-fix-20260717b';
+
+      function loadApp() {
+        var bootstrapUrl = 'flutter_bootstrap.js?v=' + assetVersion;
+        fetch(bootstrapUrl, { cache: 'no-store' })
+          .then(function (response) {
+            return response.text();
+          })
+          .then(function (source) {
+            var versionedSource = source.replace(
+              '"mainJsPath":"main.dart.js"',
+              '"mainJsPath":"main.dart.js?v=' + assetVersion + '"'
+            );
+            var script = document.createElement('script');
+            script.src = URL.createObjectURL(
+              new Blob([versionedSource], { type: 'application/javascript' })
+            );
+            document.body.appendChild(script);
+          })
+          .catch(function () {
+            var script = document.createElement('script');
+            script.src = bootstrapUrl;
+            script.async = true;
+            document.body.appendChild(script);
+          });
+      }
+
+      async function clearLegacyServiceWorker() {
+        var hadController = Boolean(navigator.serviceWorker && navigator.serviceWorker.controller);
+
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          var registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(function (registration) {
+            return registration.unregister();
+          }));
+        }
+
+        if (window.caches && window.caches.keys) {
+          var cacheNames = await window.caches.keys();
+          await Promise.all(cacheNames.map(function (cacheName) {
+            return window.caches.delete(cacheName);
+          }));
+        }
+
+        return hadController;
+      }
+
+      if (!('serviceWorker' in navigator) && !(window.caches && window.caches.keys)) {
+        loadApp();
+        return;
+      }
+
+      clearLegacyServiceWorker()
+        .then(function (hadController) {
+          if (hadController && !window.sessionStorage.getItem(reloadKey)) {
+            window.sessionStorage.setItem(reloadKey, '1');
+            window.location.reload();
+            return;
+          }
+          loadApp();
+        })
+        .catch(loadApp);
+    })();
+  </script>
 </body>
 </html>

@@ -24,8 +24,23 @@ abstract final class FirebaseBootstrap {
       _messagingSenderId.isNotEmpty &&
       _projectId.isNotEmpty;
 
-  static FirebaseOptions get options =>
-      hasEnvironmentConfig ? _environmentOptions : DefaultFirebaseOptions.web;
+  static FirebaseOptions get options {
+    final configuredOptions = hasEnvironmentConfig
+        ? _environmentOptions
+        : DefaultFirebaseOptions.web;
+    final authDomain = _customAuthDomainForCurrentHost;
+    if (authDomain == null ||
+        configuredOptions.authDomain == authDomain ||
+        (hasEnvironmentConfig && _authDomain.isNotEmpty)) {
+      return configuredOptions;
+    }
+    return configuredOptions.copyWith(authDomain: authDomain);
+  }
+
+  static String? get _customAuthDomainForCurrentHost {
+    final host = Uri.base.host.toLowerCase();
+    return host == 'groome.net' ? host : null;
+  }
 
   static FirebaseOptions get _environmentOptions => FirebaseOptions(
     apiKey: _apiKey,
